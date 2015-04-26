@@ -26,7 +26,6 @@
  */
 #ifndef STEALER_H_
 #define STEALER_H_
-#define PP_AS_SINGLE(...) __VA_ARGS__
 #define PP_CAT(x,y) x##y
 #define PP_COMMA() ,
 #define PP_DEC(n) _PP_DEC_I(n)
@@ -34,22 +33,22 @@
 #define PP_EMPTY() 
 #define PP_EXPAND(x) x
 #define PP_EXPAND_CAT(x,y) PP_CAT(x, y)
-#define PP_FIRST(...) _PP_FIRST_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
-#define PP_FOR(iters,DO,SEP,...) _PP_FOR_I(iters(DO, SEP, ##__VA_ARGS__))
-#define PP_FOR_EACH(DO,SEP,...) _PP_FOR_EACH_I(PP_SIZE(__VA_ARGS__)(DO, SEP, ##__VA_ARGS__))
+#define PP_FIRST(...) _PP_FIRST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define PP_FOR(iters,DO,SEP,...) _PP_FOR_I(iters, DO, SEP, ##__VA_ARGS__)
+#define PP_FOR_EACH(DO,SEP,...) _PP_FOR_EACH_I(DO, SEP, ##__VA_ARGS__)
 #define PP_FOR_EACH_H_ 
 #define PP_FOR_H_ 
 #define PP_H_ 
-#define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(__VA_ARGS__ _PP_IS_EMPTY_HELPER)
+#define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(_PP_IS_EMPTY_HELPER __VA_ARGS__ (),)
 #define PP_IS_EMPTY_H_ 
-#define PP_LAST(...) _PP_LAST_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
+#define PP_LAST(...) _PP_LAST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define PP_LPAREN() (
 #define PP_REMOVE_TAIL_COMMA(...) _PP_REMOVE_TAIL_COMMA_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define PP_RPAREN() )
-#define PP_SELECT(i,...) _PP_SELECT_I(i(__VA_ARGS__))
+#define PP_SELECT(i,...) _PP_SELECT_I(i, __VA_ARGS__)
 #define PP_SELECT_H_ 
 #define PP_SEMI() ;
-#define PP_SIZE(...) _PP_SIZE_I(__VA_ARGS__, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1,)
+#define PP_SIZE(...) _PP_SIZE_I(_PP_SIZE_II(__VA_ARGS__, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, ))
 #define PP_SIZE_H_ 
 #define PP_UTIL_H_ 
 #define STEALER(name,clz,...) _STEALER_I(name, clz, _STEALER_PREAPPEND_ARGS(clz, PP_REMOVE_TAIL_COMMA(__VA_ARGS__)))
@@ -119,14 +118,12 @@
 #define _PP_DEC_II_7 6
 #define _PP_DEC_II_8 7
 #define _PP_DEC_II_9 8
-#define _PP_FIRST_I(x) _PP_FIRST_II(x)
-#define _PP_FIRST_II(x) _PP_FIRST_II_##x
+#define _PP_FIRST_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_FIRST_II_, is_empty)(__VA_ARGS__))
 #define _PP_FIRST_II_0(x,...) x
 #define _PP_FIRST_II_1(...) 
-#define _PP_FOR_EACH_I(x) _PP_FOR_EACH_II(x)
-#define _PP_FOR_EACH_II(x) _PP_FOR_EACH_II_##x
+#define _PP_FOR_EACH_I(DO,SEP,...) _PP_FOR_PP_EXPAND(_PP_FOR_PP_EXPAND_CAT(_PP_FOR_EACH_II_, PP_SIZE(__VA_ARGS__))(DO, SEP, __VA_ARGS__,))
 #define _PP_FOR_EACH_II_0(...) 
-#define _PP_FOR_EACH_II_1(DO,SEP,arg,...) DO(1, arg)
+#define _PP_FOR_EACH_II_1(DO,SEP,...) DO(1, PP_SELECT(1, __VA_ARGS__))
 #define _PP_FOR_EACH_II_10(DO,SEP,...) _PP_FOR_EACH_II_9(DO, SEP, __VA_ARGS__) SEP() DO(10, PP_SELECT(10, __VA_ARGS__))
 #define _PP_FOR_EACH_II_11(DO,SEP,...) _PP_FOR_EACH_II_10(DO, SEP, __VA_ARGS__) SEP() DO(11, PP_SELECT(11, __VA_ARGS__))
 #define _PP_FOR_EACH_II_12(DO,SEP,...) _PP_FOR_EACH_II_11(DO, SEP, __VA_ARGS__) SEP() DO(12, PP_SELECT(12, __VA_ARGS__))
@@ -190,8 +187,7 @@
 #define _PP_FOR_EACH_II_7(DO,SEP,...) _PP_FOR_EACH_II_6(DO, SEP, __VA_ARGS__) SEP() DO(7, PP_SELECT(7, __VA_ARGS__))
 #define _PP_FOR_EACH_II_8(DO,SEP,...) _PP_FOR_EACH_II_7(DO, SEP, __VA_ARGS__) SEP() DO(8, PP_SELECT(8, __VA_ARGS__))
 #define _PP_FOR_EACH_II_9(DO,SEP,...) _PP_FOR_EACH_II_8(DO, SEP, __VA_ARGS__) SEP() DO(9, PP_SELECT(9, __VA_ARGS__))
-#define _PP_FOR_I(x) _PP_FOR_II(x)
-#define _PP_FOR_II(x) _PP_FOR_II_##x
+#define _PP_FOR_I(iters,DO,SEP,...) _PP_FOR_PP_EXPAND(_PP_FOR_PP_EXPAND_CAT(_PP_FOR_II_, iters)(DO, SEP, __VA_ARGS__,))
 #define _PP_FOR_II_0(...) 
 #define _PP_FOR_II_1(DO,SEP,...) DO(1, ## __VA_ARGS__)
 #define _PP_FOR_II_10(DO,SEP,...) _PP_FOR_II_9(DO, SEP, ## __VA_ARGS__) SEP() DO(10, ## __VA_ARGS__)
@@ -257,90 +253,27 @@
 #define _PP_FOR_II_7(DO,SEP,...) _PP_FOR_II_6(DO, SEP, ## __VA_ARGS__) SEP() DO(7, ## __VA_ARGS__)
 #define _PP_FOR_II_8(DO,SEP,...) _PP_FOR_II_7(DO, SEP, ## __VA_ARGS__) SEP() DO(8, ## __VA_ARGS__)
 #define _PP_FOR_II_9(DO,SEP,...) _PP_FOR_II_8(DO, SEP, ## __VA_ARGS__) SEP() DO(9, ## __VA_ARGS__)
-#define _PP_IS_EMPTY_DEF_PP_IS_EMPTY_HELPER() 1, 1
-#define _PP_IS_EMPTY_HELPER() , 0
-#define _PP_IS_EMPTY_I(...) _PP_IS_EMPTY_II(_PP_IS_EMPTY_DEF ## __VA_ARGS__())
-#define _PP_IS_EMPTY_II(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
-#define _PP_IS_EMPTY_II_0 1
-#define _PP_IS_EMPTY_II_1 0
-#define _PP_IS_EMPTY_II_10 0
-#define _PP_IS_EMPTY_II_11 0
-#define _PP_IS_EMPTY_II_12 0
-#define _PP_IS_EMPTY_II_13 0
-#define _PP_IS_EMPTY_II_14 0
-#define _PP_IS_EMPTY_II_15 0
-#define _PP_IS_EMPTY_II_16 0
-#define _PP_IS_EMPTY_II_17 0
-#define _PP_IS_EMPTY_II_18 0
-#define _PP_IS_EMPTY_II_19 0
-#define _PP_IS_EMPTY_II_2 0
-#define _PP_IS_EMPTY_II_20 0
-#define _PP_IS_EMPTY_II_21 0
-#define _PP_IS_EMPTY_II_22 0
-#define _PP_IS_EMPTY_II_23 0
-#define _PP_IS_EMPTY_II_24 0
-#define _PP_IS_EMPTY_II_25 0
-#define _PP_IS_EMPTY_II_26 0
-#define _PP_IS_EMPTY_II_27 0
-#define _PP_IS_EMPTY_II_28 0
-#define _PP_IS_EMPTY_II_29 0
-#define _PP_IS_EMPTY_II_3 0
-#define _PP_IS_EMPTY_II_30 0
-#define _PP_IS_EMPTY_II_31 0
-#define _PP_IS_EMPTY_II_32 0
-#define _PP_IS_EMPTY_II_33 0
-#define _PP_IS_EMPTY_II_34 0
-#define _PP_IS_EMPTY_II_35 0
-#define _PP_IS_EMPTY_II_36 0
-#define _PP_IS_EMPTY_II_37 0
-#define _PP_IS_EMPTY_II_38 0
-#define _PP_IS_EMPTY_II_39 0
-#define _PP_IS_EMPTY_II_4 0
-#define _PP_IS_EMPTY_II_40 0
-#define _PP_IS_EMPTY_II_41 0
-#define _PP_IS_EMPTY_II_42 0
-#define _PP_IS_EMPTY_II_43 0
-#define _PP_IS_EMPTY_II_44 0
-#define _PP_IS_EMPTY_II_45 0
-#define _PP_IS_EMPTY_II_46 0
-#define _PP_IS_EMPTY_II_47 0
-#define _PP_IS_EMPTY_II_48 0
-#define _PP_IS_EMPTY_II_49 0
-#define _PP_IS_EMPTY_II_5 0
-#define _PP_IS_EMPTY_II_50 0
-#define _PP_IS_EMPTY_II_51 0
-#define _PP_IS_EMPTY_II_52 0
-#define _PP_IS_EMPTY_II_53 0
-#define _PP_IS_EMPTY_II_54 0
-#define _PP_IS_EMPTY_II_55 0
-#define _PP_IS_EMPTY_II_56 0
-#define _PP_IS_EMPTY_II_57 0
-#define _PP_IS_EMPTY_II_58 0
-#define _PP_IS_EMPTY_II_59 0
-#define _PP_IS_EMPTY_II_6 0
-#define _PP_IS_EMPTY_II_60 0
-#define _PP_IS_EMPTY_II_61 0
-#define _PP_IS_EMPTY_II_62 0
-#define _PP_IS_EMPTY_II_63 0
-#define _PP_IS_EMPTY_II_64 0
-#define _PP_IS_EMPTY_II_7 0
-#define _PP_IS_EMPTY_II_8 0
-#define _PP_IS_EMPTY_II_9 0
-#define _PP_LAST_I(x) _PP_LAST_II(x)
-#define _PP_LAST_II(x) _PP_LAST_II_##x
+#define _PP_FOR_PP_CAT(x,y) x##y
+#define _PP_FOR_PP_EXPAND(x) x
+#define _PP_FOR_PP_EXPAND_CAT(x,y) _PP_FOR_PP_CAT(x, y)
+#define _PP_IS_EMPTY_DEF_1 1, PP_EMPTY
+#define _PP_IS_EMPTY_DEF__PP_IS_EMPTY_HELPER 0, PP_EMPTY
+#define _PP_IS_EMPTY_HELPER() 1
+#define _PP_IS_EMPTY_I(test,...) _PP_IS_EMPTY_II( PP_SELECT(1, _PP_IS_EMPTY_PP_EXPAND_CAT(_PP_IS_EMPTY_DEF_, test)))
+#define _PP_IS_EMPTY_II(id) id
+#define _PP_IS_EMPTY_PP_CAT(x,y) x##y
+#define _PP_IS_EMPTY_PP_EXPAND_CAT(x,y,...) _PP_IS_EMPTY_PP_CAT(x, y)
+#define _PP_LAST_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_LAST_II_, is_empty)(__VA_ARGS__))
 #define _PP_LAST_II_0(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
 #define _PP_LAST_II_1(...) 
 #define _PP_REMOVE_TAIL_COMMA_FOR_DO(i,...) PP_SELECT(i, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_I(is_empty,...) _PP_REMOVE_TAIL_COMMA_II(is_empty, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_II(is_empty,...) _PP_REMOVE_TAIL_COMMA_II_##is_empty(__VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_III(is_empty,...) _PP_REMOVE_TAIL_COMMA_IIII(is_empty, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_IIII(is_empty,...) _PP_REMOVE_TAIL_COMMA_IIII_##is_empty(__VA_ARGS__)
+#define _PP_REMOVE_TAIL_COMMA_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_II_, is_empty) (__VA_ARGS__))
+#define _PP_REMOVE_TAIL_COMMA_III(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_IIII_, is_empty) (__VA_ARGS__))
 #define _PP_REMOVE_TAIL_COMMA_IIII_0(...) __VA_ARGS__
 #define _PP_REMOVE_TAIL_COMMA_IIII_1(...) PP_FOR(PP_DEC(PP_SIZE(__VA_ARGS__)), _PP_REMOVE_TAIL_COMMA_FOR_DO, PP_COMMA, __VA_ARGS__)
 #define _PP_REMOVE_TAIL_COMMA_II_0(...) _PP_REMOVE_TAIL_COMMA_III( PP_IS_EMPTY(PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)), __VA_ARGS__)
 #define _PP_REMOVE_TAIL_COMMA_II_1(...) __VA_ARGS__
-#define _PP_SELECT_I(x) _PP_SELECT_II(x)
-#define _PP_SELECT_II(x) _PP_SELECT_II_##x
+#define _PP_SELECT_I(i,...) _PP_SELECT_PP_EXPAND(_PP_SELECT_PP_EXPAND_CAT(_PP_SELECT_II_, i)(__VA_ARGS__,))
 #define _PP_SELECT_II_0(...) 
 #define _PP_SELECT_II_1(e0,...) e0
 #define _PP_SELECT_II_10(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,...) e9
@@ -406,22 +339,27 @@
 #define _PP_SELECT_II_7(e0,e1,e2,e3,e4,e5,e6,...) e6
 #define _PP_SELECT_II_8(e0,e1,e2,e3,e4,e5,e6,e7,...) e7
 #define _PP_SELECT_II_9(e0,e1,e2,e3,e4,e5,e6,e7,e8,...) e8
-#define _PP_SIZE_I(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15,e16,e17,e18,e19,e20,e21,e22,e23,e24,e25,e26,e27,e28,e29,e30,e31,e32,e33,e34,e35,e36,e37,e38,e39,e40,e41,e42,e43,e44,e45,e46,e47,e48,e49,e50,e51,e52,e53,e54,e55,e56,e57,e58,e59,e60,e61,e62,e63,size,...) size
-#define _STEALER_ARGS_ONLY_NAMES(...) _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
+#define _PP_SELECT_PP_CAT(x,y) x##y
+#define _PP_SELECT_PP_EXPAND(x) x
+#define _PP_SELECT_PP_EXPAND_CAT(x,y) _PP_SELECT_PP_CAT(x, y)
+#define _PP_SIZE_I(x) x
+#define _PP_SIZE_II(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15,e16,e17,e18,e19,e20,e21,e22,e23,e24,e25,e26,e27,e28,e29,e30,e31,e32,e33,e34,e35,e36,e37,e38,e39,e40,e41,e42,e43,e44,e45,e46,e47,e48,e49,e50,e51,e52,e53,e54,e55,e56,e57,e58,e59,e60,e61,e62,e63,size,...) size
+#define _STEALER_ARGS_ONLY_NAMES(...) _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_ONLY_NAMES_DO(i,arg) a##i
-#define _STEALER_ARGS_ONLY_NAMES_I(x) _STEALER_ARGS_ONLY_NAMES_II(x)
-#define _STEALER_ARGS_ONLY_NAMES_II(x) _STEALER_ARGS_ONLY_NAMES_II_##x
+#define _STEALER_ARGS_ONLY_NAMES_I(is_empty,...) _STEALER_EXPAND( _STEALER_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) (__VA_ARGS__))
 #define _STEALER_ARGS_ONLY_NAMES_II_0(...) PP_FOR_EACH(_STEALER_ARGS_ONLY_NAMES_DO, PP_COMMA, __VA_ARGS__)
 #define _STEALER_ARGS_ONLY_NAMES_II_1(...) 
-#define _STEALER_ARGS_WITH_NAMES(...) _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
+#define _STEALER_ARGS_WITH_NAMES(...) _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_WITH_NAMES_DO(i,arg) arg a##i
-#define _STEALER_ARGS_WITH_NAMES_I(x) _STEALER_ARGS_WITH_NAMES_II(x)
-#define _STEALER_ARGS_WITH_NAMES_II(x) _STEALER_ARGS_WITH_NAMES_II_##x
+#define _STEALER_ARGS_WITH_NAMES_I(is_empty,...) _STEALER_EXPAND( _STEALER_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) (__VA_ARGS__))
 #define _STEALER_ARGS_WITH_NAMES_II_0(...) PP_FOR_EACH(_STEALER_ARGS_WITH_NAMES_DO, PP_COMMA, __VA_ARGS__)
 #define _STEALER_ARGS_WITH_NAMES_II_1(...) 
+#define _STEALER_CAT(x,y) x##y
 #define _STEALER_DECL_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_DECL_FIELDS_DO_, __VA_ARGS__)
 #define _STEALER_DECL_FIELDS_DO_0(...) 
 #define _STEALER_DECL_FIELDS_DO_1(id,clz,type,name) type& name;
+#define _STEALER_EXPAND(x) x
+#define _STEALER_EXPAND_CAT(x,y) _STEALER_CAT(x, y)
 #define _STEALER_FIELD_GETTERS(...) _STEALER_FILTER_FIELDS(_STEALER_FIELD_GETTERS_DO_, __VA_ARGS__)
 #define _STEALER_FIELD_GETTERS_DO_0(...) 
 #define _STEALER_FIELD_GETTERS_DO_1(id,clz,type,name) ::stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { return _obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL); }

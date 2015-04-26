@@ -82,6 +82,11 @@ struct mould
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// redefine PP_EXPAND() and PP_EXPAND_CAT(), to avoid recursive expanding
+#define _STEALER_EXPAND(x) x
+#define _STEALER_CAT(x, y) x##y
+#define _STEALER_EXPAND_CAT(x, y) _STEALER_CAT(x, y)
+
 #define _STEALER_PRINT_FIELD(...) __VA_ARGS__
 #define _STEALER_PRINT_METHOD(...) __VA_ARGS__
 
@@ -181,10 +186,12 @@ struct mould
 
 ///////////////////////////////////////////////////////////////////////////////
 #define _STEALER_ARGS_WITH_NAMES(...) \
-        _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
-#define _STEALER_ARGS_WITH_NAMES_I(x) _STEALER_ARGS_WITH_NAMES_II(x)
-#define _STEALER_ARGS_WITH_NAMES_II(x) _STEALER_ARGS_WITH_NAMES_II_##x
-#define _STEALER_ARGS_WITH_NAMES_II_1(...) // empty
+        _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define _STEALER_ARGS_WITH_NAMES_I(is_empty, ...) \
+        _STEALER_EXPAND( \
+                _STEALER_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) \
+                (__VA_ARGS__))
+#define _STEALER_ARGS_WITH_NAMES_II_1(...) // nothing
 #define _STEALER_ARGS_WITH_NAMES_II_0(...) \
         PP_FOR_EACH(_STEALER_ARGS_WITH_NAMES_DO, PP_COMMA, __VA_ARGS__)
 
@@ -192,10 +199,12 @@ struct mould
 
 
 #define _STEALER_ARGS_ONLY_NAMES(...) \
-        _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
-#define _STEALER_ARGS_ONLY_NAMES_I(x) _STEALER_ARGS_ONLY_NAMES_II(x)
-#define _STEALER_ARGS_ONLY_NAMES_II(x) _STEALER_ARGS_ONLY_NAMES_II_##x
-#define _STEALER_ARGS_ONLY_NAMES_II_1(...) // empty
+        _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define _STEALER_ARGS_ONLY_NAMES_I(is_empty, ...) \
+        _STEALER_EXPAND( \
+                _STEALER_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) \
+                (__VA_ARGS__))
+#define _STEALER_ARGS_ONLY_NAMES_II_1(...) // nothing
 #define _STEALER_ARGS_ONLY_NAMES_II_0(...) \
         PP_FOR_EACH(_STEALER_ARGS_ONLY_NAMES_DO, PP_COMMA, __VA_ARGS__)
 

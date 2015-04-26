@@ -35,85 +35,20 @@
 #ifndef PP_IS_EMPTY_H_
 #define PP_IS_EMPTY_H_
 
-#include "size.h"
 #include "select.h"
 #include "util.h"
 
-#define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(__VA_ARGS__ _PP_IS_EMPTY_HELPER)
-#define _PP_IS_EMPTY_I(...) _PP_IS_EMPTY_II(_PP_IS_EMPTY_DEF ## __VA_ARGS__())
-#define _PP_IS_EMPTY_II(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
+#define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(_PP_IS_EMPTY_HELPER __VA_ARGS__ (),)
+#define _PP_IS_EMPTY_I(test, ...) _PP_IS_EMPTY_II( \
+ 		PP_SELECT(1, _PP_IS_EMPTY_PP_EXPAND_CAT(_PP_IS_EMPTY_DEF_, test)))
+#define _PP_IS_EMPTY_II(id) id
 
-#define _PP_IS_EMPTY_DEF_PP_IS_EMPTY_HELPER() 1, 1
-#define _PP_IS_EMPTY_HELPER() , 0
+// workaround for VS2012
+#define _PP_IS_EMPTY_PP_CAT(x, y) x##y
+#define _PP_IS_EMPTY_PP_EXPAND_CAT(x, y, ...) _PP_IS_EMPTY_PP_CAT(x, y)
 
-//#define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(PP_SIZE(__VA_ARGS__))
-//#define _PP_IS_EMPTY_I(x) _PP_IS_EMPTY_II(x)
-//#define _PP_IS_EMPTY_II(x) _PP_IS_EMPTY_II_##x
-
-#define _PP_IS_EMPTY_II_0  1
-#define _PP_IS_EMPTY_II_1  0
-#define _PP_IS_EMPTY_II_2  0
-#define _PP_IS_EMPTY_II_3  0
-#define _PP_IS_EMPTY_II_4  0
-#define _PP_IS_EMPTY_II_5  0
-#define _PP_IS_EMPTY_II_6  0
-#define _PP_IS_EMPTY_II_7  0
-#define _PP_IS_EMPTY_II_8  0
-#define _PP_IS_EMPTY_II_9  0
-#define _PP_IS_EMPTY_II_10 0
-#define _PP_IS_EMPTY_II_11 0
-#define _PP_IS_EMPTY_II_12 0
-#define _PP_IS_EMPTY_II_13 0
-#define _PP_IS_EMPTY_II_14 0
-#define _PP_IS_EMPTY_II_15 0
-#define _PP_IS_EMPTY_II_16 0
-#define _PP_IS_EMPTY_II_17 0
-#define _PP_IS_EMPTY_II_18 0
-#define _PP_IS_EMPTY_II_19 0
-#define _PP_IS_EMPTY_II_20 0
-#define _PP_IS_EMPTY_II_21 0
-#define _PP_IS_EMPTY_II_22 0
-#define _PP_IS_EMPTY_II_23 0
-#define _PP_IS_EMPTY_II_24 0
-#define _PP_IS_EMPTY_II_25 0
-#define _PP_IS_EMPTY_II_26 0
-#define _PP_IS_EMPTY_II_27 0
-#define _PP_IS_EMPTY_II_28 0
-#define _PP_IS_EMPTY_II_29 0
-#define _PP_IS_EMPTY_II_30 0
-#define _PP_IS_EMPTY_II_31 0
-#define _PP_IS_EMPTY_II_32 0
-#define _PP_IS_EMPTY_II_33 0
-#define _PP_IS_EMPTY_II_34 0
-#define _PP_IS_EMPTY_II_35 0
-#define _PP_IS_EMPTY_II_36 0
-#define _PP_IS_EMPTY_II_37 0
-#define _PP_IS_EMPTY_II_38 0
-#define _PP_IS_EMPTY_II_39 0
-#define _PP_IS_EMPTY_II_40 0
-#define _PP_IS_EMPTY_II_41 0
-#define _PP_IS_EMPTY_II_42 0
-#define _PP_IS_EMPTY_II_43 0
-#define _PP_IS_EMPTY_II_44 0
-#define _PP_IS_EMPTY_II_45 0
-#define _PP_IS_EMPTY_II_46 0
-#define _PP_IS_EMPTY_II_47 0
-#define _PP_IS_EMPTY_II_48 0
-#define _PP_IS_EMPTY_II_49 0
-#define _PP_IS_EMPTY_II_50 0
-#define _PP_IS_EMPTY_II_51 0
-#define _PP_IS_EMPTY_II_52 0
-#define _PP_IS_EMPTY_II_53 0
-#define _PP_IS_EMPTY_II_54 0
-#define _PP_IS_EMPTY_II_55 0
-#define _PP_IS_EMPTY_II_56 0
-#define _PP_IS_EMPTY_II_57 0
-#define _PP_IS_EMPTY_II_58 0
-#define _PP_IS_EMPTY_II_59 0
-#define _PP_IS_EMPTY_II_60 0
-#define _PP_IS_EMPTY_II_61 0
-#define _PP_IS_EMPTY_II_62 0
-#define _PP_IS_EMPTY_II_63 0
-#define _PP_IS_EMPTY_II_64 0
+#define _PP_IS_EMPTY_HELPER() 1
+#define _PP_IS_EMPTY_DEF_1 1, PP_EMPTY
+#define _PP_IS_EMPTY_DEF__PP_IS_EMPTY_HELPER 0, PP_EMPTY
 
 #endif /* PP_IS_EMPTY_H_ */

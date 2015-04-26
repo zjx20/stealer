@@ -37,9 +37,13 @@
 
 #include "util.h"
 
-#define PP_SELECT(i, ...) _PP_SELECT_I(i(__VA_ARGS__))
-#define _PP_SELECT_I(x) _PP_SELECT_II(x)
-#define _PP_SELECT_II(x) _PP_SELECT_II_##x
+#define PP_SELECT(i, ...) _PP_SELECT_I(i, __VA_ARGS__)
+#define _PP_SELECT_I(i, ...) _PP_SELECT_PP_EXPAND(_PP_SELECT_PP_EXPAND_CAT(_PP_SELECT_II_, i)(__VA_ARGS__,))
+
+// redefine PP_EXPAND() and PP_EXPAND_CAT(), to avoid recursive expanding
+#define _PP_SELECT_PP_EXPAND(x) x
+#define _PP_SELECT_PP_CAT(x, y) x##y
+#define _PP_SELECT_PP_EXPAND_CAT(x, y) _PP_SELECT_PP_CAT(x, y)
 
 #define _PP_SELECT_II_0(...)
 #define _PP_SELECT_II_1(e0, ...) e0

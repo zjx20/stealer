@@ -36,7 +36,7 @@
 #include <iostream>
 #include <map>
 
-#include "stealer.h"
+#include "../src/stealer.h"
 
 class private_t
 {

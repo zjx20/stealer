@@ -39,14 +39,27 @@
 #include "size.h"
 #include "select.h"
 
+// std::string SEP() {return ",";}
+// std::string DO(size_t i, std::string str) {return "xxx";}
+// std::string result = "";
+// std::vector<std::string> args = __VA_ARGS__;
+// size_t size = args.size();
+// for (int i = 1; i <= size; i++) {
+//   result += DO(i, args[i]);
+//   if (i != size) { result += SEP(); }
+// }
 #define PP_FOR_EACH(DO, SEP, ...) \
-        _PP_FOR_EACH_I(PP_SIZE(__VA_ARGS__)(DO, SEP, ##__VA_ARGS__))
+        _PP_FOR_EACH_I(DO, SEP, ##__VA_ARGS__)
 
-#define _PP_FOR_EACH_I(x) _PP_FOR_EACH_II(x)
-#define _PP_FOR_EACH_II(x) _PP_FOR_EACH_II_##x
+#define _PP_FOR_EACH_I(DO, SEP, ...) _PP_FOR_PP_EXPAND(_PP_FOR_PP_EXPAND_CAT(_PP_FOR_EACH_II_, PP_SIZE(__VA_ARGS__))(DO, SEP, __VA_ARGS__,))
+
+// redefine PP_EXPAND() and PP_EXPAND_CAT(), to avoid recursive expanding
+#define _PP_FOR_PP_EXPAND(x) x
+#define _PP_FOR_PP_CAT(x, y) x##y
+#define _PP_FOR_PP_EXPAND_CAT(x, y) _PP_FOR_PP_CAT(x, y)
 
 #define _PP_FOR_EACH_II_0(...)
-#define _PP_FOR_EACH_II_1(DO,  SEP, arg, ...) DO(1, arg)
+#define _PP_FOR_EACH_II_1(DO,  SEP, ...) DO(1, PP_SELECT(1,  __VA_ARGS__))
 #define _PP_FOR_EACH_II_2(DO,  SEP, ...) _PP_FOR_EACH_II_1(DO,  SEP, __VA_ARGS__) SEP() DO(2,  PP_SELECT(2,  __VA_ARGS__))
 #define _PP_FOR_EACH_II_3(DO,  SEP, ...) _PP_FOR_EACH_II_2(DO,  SEP, __VA_ARGS__) SEP() DO(3,  PP_SELECT(3,  __VA_ARGS__))
 #define _PP_FOR_EACH_II_4(DO,  SEP, ...) _PP_FOR_EACH_II_3(DO,  SEP, __VA_ARGS__) SEP() DO(4,  PP_SELECT(4,  __VA_ARGS__))

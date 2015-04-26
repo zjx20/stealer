@@ -40,16 +40,23 @@
 #include "select.h"
 
 // std::string SEP() {return ",";}
+// std::string DO(size_t i, std::vector<std::string> args) {return "xxx";}
+// size_t iters = iters;
+// std::vector<std::string> args = __VA_ARGS__;
 // std::string result = "";
 // for (int i = 1; i <= iters; i++) {
 //   result += DO(i, args);
 //   if (i != iters) { result += SEP(); }
 // }
 #define PP_FOR(iters, DO, SEP, ...) \
-        _PP_FOR_I(iters(DO, SEP, ##__VA_ARGS__))
+ 		_PP_FOR_I(iters, DO, SEP, ##__VA_ARGS__)
 
-#define _PP_FOR_I(x) _PP_FOR_II(x)
-#define _PP_FOR_II(x) _PP_FOR_II_##x
+#define _PP_FOR_I(iters, DO, SEP, ...) _PP_FOR_PP_EXPAND(_PP_FOR_PP_EXPAND_CAT(_PP_FOR_II_, iters)(DO, SEP, __VA_ARGS__,))
+
+// redefine PP_EXPAND() and PP_EXPAND_CAT(), to avoid recursive expanding
+#define _PP_FOR_PP_EXPAND(x) x
+#define _PP_FOR_PP_CAT(x, y) x##y
+#define _PP_FOR_PP_EXPAND_CAT(x, y) _PP_FOR_PP_CAT(x, y)
 
 #define _PP_FOR_II_0(...)
 #define _PP_FOR_II_1(DO,  SEP, ...) DO(1,  ## __VA_ARGS__)

@@ -44,35 +44,31 @@
 #define PP_CAT(x, y) x##y
 #define PP_EXPAND_CAT(x, y) PP_CAT(x, y)
 
-#define PP_AS_SINGLE(...) __VA_ARGS__
-
-#define PP_FIRST(...) _PP_FIRST_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
-#define _PP_FIRST_I(x) _PP_FIRST_II(x)
-#define _PP_FIRST_II(x) _PP_FIRST_II_##x
-#define _PP_FIRST_II_1(...) // empty
+#define PP_FIRST(...) _PP_FIRST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define _PP_FIRST_I(is_empty, ...) \
+        PP_EXPAND(PP_EXPAND_CAT(_PP_FIRST_II_, is_empty)(__VA_ARGS__))
+#define _PP_FIRST_II_1(...) // nothing
 #define _PP_FIRST_II_0(x, ...) x
 
-#define PP_LAST(...) _PP_LAST_I(PP_IS_EMPTY(__VA_ARGS__)(__VA_ARGS__))
-#define _PP_LAST_I(x) _PP_LAST_II(x)
-#define _PP_LAST_II(x) _PP_LAST_II_##x
-#define _PP_LAST_II_1(...) // empty
+#define PP_LAST(...) _PP_LAST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define _PP_LAST_I(is_empty, ...) \
+        PP_EXPAND(PP_EXPAND_CAT(_PP_LAST_II_, is_empty)(__VA_ARGS__))
+#define _PP_LAST_II_1(...) // nothing
 #define _PP_LAST_II_0(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
 
 #define PP_REMOVE_TAIL_COMMA(...) \
         _PP_REMOVE_TAIL_COMMA_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _PP_REMOVE_TAIL_COMMA_I(is_empty, ...) \
-        _PP_REMOVE_TAIL_COMMA_II(is_empty, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_II(is_empty, ...) \
-        _PP_REMOVE_TAIL_COMMA_II_##is_empty(__VA_ARGS__)
+        PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_II_, is_empty) \
+                (__VA_ARGS__))
 #define _PP_REMOVE_TAIL_COMMA_II_1(...) __VA_ARGS__
 #define _PP_REMOVE_TAIL_COMMA_II_0(...) \
         _PP_REMOVE_TAIL_COMMA_III( \
                 PP_IS_EMPTY(PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)), \
-                __VA_ARGS__)
+                        __VA_ARGS__)
 #define _PP_REMOVE_TAIL_COMMA_III(is_empty, ...) \
-        _PP_REMOVE_TAIL_COMMA_IIII(is_empty, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_IIII(is_empty, ...) \
-        _PP_REMOVE_TAIL_COMMA_IIII_##is_empty(__VA_ARGS__)
+        PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_IIII_, is_empty) \
+                (__VA_ARGS__))
 #define _PP_REMOVE_TAIL_COMMA_IIII_0(...) __VA_ARGS__
 #define _PP_REMOVE_TAIL_COMMA_IIII_1(...) \
         PP_FOR(PP_DEC(PP_SIZE(__VA_ARGS__)), _PP_REMOVE_TAIL_COMMA_FOR_DO, \
