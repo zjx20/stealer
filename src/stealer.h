@@ -82,56 +82,65 @@ struct mould
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// redefine PP_EXPAND() and PP_EXPAND_CAT(), to avoid recursive expanding
-#define _STEALER_EXPAND(x) x
-#define _STEALER_CAT(x, y) x##y
-#define _STEALER_EXPAND_CAT(x, y) _STEALER_CAT(x, y)
-
-#define _STEALER_PRINT_FIELD(...) __VA_ARGS__
-#define _STEALER_PRINT_METHOD(...) __VA_ARGS__
-
 #define _STEALER_SLOT(id) _STEALER_SLOT_I(id, __LINE__)
 #define _STEALER_SLOT_I(id, line) _STEALER_SLOT_II(id, line)
 #define _STEALER_SLOT_II(id, line) _slot_##id##_##line
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_IS_FIELD_FIELD(...) 1
-#define _STEALER_IS_FIELD_METHOD(...) 0
+#define _STEALER_IS_FIELD_STEAL_FIELD(...) 1
+#define _STEALER_IS_FIELD_STEAL_METHOD(...) 0
 
-#define _STEALER_IS_METHOD_FIELD(...) 0
-#define _STEALER_IS_METHOD_METHOD(...) 1
+#define _STEALER_IS_METHOD_STEAL_FIELD(...) 0
+#define _STEALER_IS_METHOD_STEAL_METHOD(...) 1
 
-#define _STEALER_FILTER_DO(i, CHECK, DO, ...) \
-        PP_EXPAND_CAT(DO, \
-                PP_EXPAND_CAT(CHECK, PP_SELECT(i, __VA_ARGS__)) \
-                (PP_EXPAND_CAT(_STEALER_PRINT_, PP_SELECT(i, __VA_ARGS__))) )
+#define _STEALER_FILTER_DO(i, ...) \
+        PP_EXPAND(_STEALER_FILTER_DO_I(i, __VA_ARGS__))
+#define _STEALER_FILTER_DO_I(i, CHECK, DO, ...) \
+        _STEALER_FILTER_DO_II(CHECK, DO, PP_SELECT(i, __VA_ARGS__))
+#define _STEALER_FILTER_DO_II(CHECK, DO, x) \
+        PP_IF(PP_IS_TUPLE(x), _STEALER_FILTER_DO_III, \
+                CHECK, DO, PP_TUPLE_TO_VARS(x))
+
+#define _STEALER_FILTER_DO_III(CHECK, DO, ...) \
+        PP_EXPAND(_STEALER_FILTER_DO_IV(CHECK, DO, __VA_ARGS__))
+#define _STEALER_FILTER_DO_IV(CHECK, DO, type, ...) \
+        _STEALER_FILTER_DO_V(PP_EXPAND_CAT(CHECK, type)(), DO, __VA_ARGS__)
+#define _STEALER_FILTER_DO_V(cond, DO, ...) \
+        PP_EXPAND(PP_EXPAND_CAT(_STEALER_FILTER_DO_VI_, cond)(DO, __VA_ARGS__))
+#define _STEALER_FILTER_DO_VI_0(...)    // nothing
+#define _STEALER_FILTER_DO_VI_1(DO, ...) PP_EXPAND(PP_CAT(DO,)(__VA_ARGS__))
 
 #define _STEALER_FILTER(CHECK, DO, ...) \
         PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_FILTER_DO, PP_EMPTY, \
                 CHECK, DO, __VA_ARGS__)
 
 #define _STEALER_FILTER_FIELDS(DO, ...) \
-        _STEALER_FILTER(_STEALER_IS_FIELD_, DO, __VA_ARGS__)
+        _STEALER_FILTER(_STEALER_IS_FIELD, DO, __VA_ARGS__)
 
 #define _STEALER_FILTER_METHODS(DO, ...) \
-        _STEALER_FILTER(_STEALER_IS_METHOD_, DO, __VA_ARGS__)
+        _STEALER_FILTER(_STEALER_IS_METHOD, DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_TYPE_FIELD(...) FIELD
-#define _STEALER_TYPE_METHOD(...) METHOD
+#define _STEALER_PREPROCESS_ARGS_DO(i, ...) \
+        _STEALER_PREPROCESS_ARGS_DO_I(\
+                _STEALER_PREPROCESS_ARGS_DO_II(i, __VA_ARGS__))
+#define _STEALER_PREPROCESS_ARGS_DO_I(...) __VA_ARGS__
+#define _STEALER_PREPROCESS_ARGS_DO_II(i, clz, ...) \
+        PP_IF(PP_IS_TUPLE(PP_SELECT(i, __VA_ARGS__)), \
+                _STEALER_PREPROCESS_ARGS_DO_III, i, clz, \
+                PP_TUPLE_TO_VARS(PP_SELECT(i, __VA_ARGS__)))
+#define _STEALER_PREPROCESS_ARGS_DO_III(id, clz, ...) \
+        PP_EXPAND(_STEALER_PREPROCESS_ARGS_DO_IV(id, clz, __VA_ARGS__))
+#define _STEALER_PREPROCESS_ARGS_DO_IV(id, clz, type, ...) \
+        (type, id, clz, __VA_ARGS__)
 
-#define _STEALER_PREAPPEND_ARGS_DO(i, arg, ...) \
-        PP_EXPAND_CAT(_STEALER_TYPE_, PP_SELECT(i, __VA_ARGS__)) \
-        (i, arg, PP_EXPAND_CAT(_STEALER_PRINT_, PP_SELECT(i, __VA_ARGS__)))
-
-#define _STEALER_PREAPPEND_ARGS(arg, ...) \
-        PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_PREAPPEND_ARGS_DO, PP_COMMA, \
-                arg, __VA_ARGS__)
+#define _STEALER_PREPROCESS_ARGS(clz, ...) \
+        PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_PREPROCESS_ARGS_DO, PP_COMMA, \
+                clz, __VA_ARGS__)
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_PREPARE_FIELD_DO_0(...)
-#define _STEALER_PREPARE_FIELD_DO_1(id, clz, type, name) \
+#define _STEALER_PREPARE_FIELD_DO(id, clz, type, name) \
         struct _STEALER_SLOT(id) { \
             typedef type value_type; \
             typedef value_type(clz::*shape); \
@@ -140,12 +149,11 @@ struct mould
         template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
 
 #define _STEALER_PREPARE_FIELDS(...) \
-        _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO_, __VA_ARGS__)
+        _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_PREPARE_METHOD_DO_0(...)
-#define _STEALER_PREPARE_METHOD_DO_1(id, clz, ret_type, name, ...) \
+#define _STEALER_PREPARE_METHOD_DO(id, clz, ret_type, name, ...) \
         struct _STEALER_SLOT(id) { \
             typedef ret_type return_type; \
             typedef ret_type(clz::*shape)(__VA_ARGS__); \
@@ -154,42 +162,38 @@ struct mould
         template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
 
 #define _STEALER_PREPARE_METHODS(...) \
-        _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO_, __VA_ARGS__)
+        _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_INITIALIZOR_DO_0(...)
-#define _STEALER_INITIALIZOR_DO_1(id, clz, type, name) , name(_stealer##name())
+#define _STEALER_INITIALIZOR_DO(id, clz, type, name) , name(_stealer##name())
 
 #define _STEALER_INITIALIZOR(...) \
-        _STEALER_FILTER_FIELDS(_STEALER_INITIALIZOR_DO_, __VA_ARGS__)
+        _STEALER_FILTER_FIELDS(_STEALER_INITIALIZOR_DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_DECL_FIELDS_DO_0(...)
-#define _STEALER_DECL_FIELDS_DO_1(id, clz, type, name) type& name;
+#define _STEALER_DECL_FIELDS_DO(id, clz, type, name) type& name;
 
 #define _STEALER_DECL_FIELDS(...) \
-        _STEALER_FILTER_FIELDS(_STEALER_DECL_FIELDS_DO_, __VA_ARGS__)
+        _STEALER_FILTER_FIELDS(_STEALER_DECL_FIELDS_DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_FIELD_GETTERS_DO_0(...)
-#define _STEALER_FIELD_GETTERS_DO_1(id, clz, type, name) \
+#define _STEALER_FIELD_GETTERS_DO(id, clz, type, name) \
         ::stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { \
             return _obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL); \
         }
 
 #define _STEALER_FIELD_GETTERS(...) \
-        _STEALER_FILTER_FIELDS(_STEALER_FIELD_GETTERS_DO_, __VA_ARGS__)
+        _STEALER_FILTER_FIELDS(_STEALER_FIELD_GETTERS_DO, __VA_ARGS__)
 
 
 ///////////////////////////////////////////////////////////////////////////////
 #define _STEALER_ARGS_WITH_NAMES(...) \
         _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_WITH_NAMES_I(is_empty, ...) \
-        _STEALER_EXPAND( \
-                _STEALER_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) \
+        PP_EXPAND(PP_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) \
                 (__VA_ARGS__))
 #define _STEALER_ARGS_WITH_NAMES_II_1(...) // nothing
 #define _STEALER_ARGS_WITH_NAMES_II_0(...) \
@@ -201,8 +205,7 @@ struct mould
 #define _STEALER_ARGS_ONLY_NAMES(...) \
         _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_ONLY_NAMES_I(is_empty, ...) \
-        _STEALER_EXPAND( \
-                _STEALER_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) \
+        PP_EXPAND(PP_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) \
                 (__VA_ARGS__))
 #define _STEALER_ARGS_ONLY_NAMES_II_1(...) // nothing
 #define _STEALER_ARGS_ONLY_NAMES_II_0(...) \
@@ -211,8 +214,7 @@ struct mould
 #define _STEALER_ARGS_ONLY_NAMES_DO(i, arg) a##i
 
 
-#define _STEALER_METHOD_DO_0(...)
-#define _STEALER_METHOD_DO_1(id, clz, ret_type, name, ...) \
+#define _STEALER_METHOD_DO(id, clz, ret_type, name, ...) \
         ::stealer::_STEALER_SLOT(id)::return_type name( \
                 _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { \
             return (_obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL)) \
@@ -220,12 +222,14 @@ struct mould
         }
 
 #define _STEALER_METHODS(...) \
-        _STEALER_FILTER_METHODS(_STEALER_METHOD_DO_, __VA_ARGS__)
+        _STEALER_FILTER_METHODS(_STEALER_METHOD_DO, __VA_ARGS__)
 
 ///////////////////////////////////////////////////////////////////////////////
+#define STEAL_FIELD(...) (_STEAL_FIELD, __VA_ARGS__)
+#define STEAL_METHOD(...) (_STEAL_METHOD, __VA_ARGS__)
+
 #define STEALER(name, clz, ...) \
-        _STEALER_I(name, clz, _STEALER_PREAPPEND_ARGS(clz, \
-                PP_REMOVE_TAIL_COMMA(__VA_ARGS__)))
+        _STEALER_I(name, clz, _STEALER_PREPROCESS_ARGS(clz, __VA_ARGS__))
 
 #define _STEALER_I(name, clz, ...) \
         namespace stealer { \

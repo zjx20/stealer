@@ -39,5 +39,6 @@
 #include "pp/for.h"
 #include "pp/for_each.h"
 #include "pp/select.h"
+#include "pp/tuple.h"
 
 #endif /* PP_H_ */

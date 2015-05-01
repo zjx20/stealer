@@ -5,7 +5,7 @@
 CXXTOOL = g++
 EXTRA_FLAG ?= 
 CXXFLAGS = $(EXTRA_FLAG) -I../src -Wall -Wextra -fmacro-backtrace-limit=0
-TARGETS := pp_test stealer_sample
+TARGETS := pp_test stealer_test stealer_sample
 
 ifneq ($(MAKECMDGOALS),)
 ifneq ($(wildcard $(MAKECMDGOALS).cpp),)

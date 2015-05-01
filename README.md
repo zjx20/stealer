@@ -1,6 +1,11 @@
-# Stealer: stealing privates of c++ objects
+# Stealer: stealing privates of c++ object
 
 The main purpose of stealer is for testing: that makes it possible to test privates of a class without changing its design.
+
+It was tested in:
+
+* Apple LLVM version 6.1.0 (clang-602.0.49)
+* VS2012
 
 ## Usage
 
@@ -47,13 +52,13 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
 
     ```cpp
     STEALER(stealer_private_t, private_t,
-            /* FIELD(type_of_the_field, field_name) */
-            FIELD(int, _private_int),
-            FIELD(std::string, _private_string),
+            /* STEAL_FIELD(type_of_the_field, field_name) */
+            STEAL_FIELD(int, _private_int),
+            STEAL_FIELD(std::string, _private_string),
             
-            /* METHOD(return_type_of_the_method, method_name, arg1, arg2, ...) */
-            METHOD(void, private_method),
-            METHOD(int, private_method3, int, double, const std::string&),
+            /* STEAL_METHOD(return_type_of_the_method, method_name, arg1, arg2, ...) */
+            STEAL_METHOD(void, private_method),
+            STEAL_METHOD(int, private_method3, int, double, const std::string&),
     );
     ```
     

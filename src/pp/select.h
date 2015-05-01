@@ -35,8 +35,6 @@
 #ifndef PP_SELECT_H_
 #define PP_SELECT_H_
 
-#include "util.h"
-
 #define PP_SELECT(i, ...) _PP_SELECT_I(i, __VA_ARGS__)
 #define _PP_SELECT_I(i, ...) _PP_SELECT_PP_EXPAND(_PP_SELECT_PP_EXPAND_CAT(_PP_SELECT_II_, i)(__VA_ARGS__,))
 

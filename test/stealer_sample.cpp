@@ -83,12 +83,12 @@ private:
 typedef std::map<int, char> map_t;
 
 STEALER(stealer_private_t, private_t,
-        FIELD(int, _private_int),
-        FIELD(std::string, _private_string),
-        FIELD(map_t, _private_map), // typedef helps a lot
+       STEAL_FIELD(int, _private_int),
+       STEAL_FIELD(std::string, _private_string),
+       STEAL_FIELD(map_t, _private_map), // typedef helps a lot
 
-        METHOD(void, private_method),
-        METHOD(int, private_method3, int, double, const std::string&),
+       STEAL_METHOD(void, private_method),
+       STEAL_METHOD(int, private_method3, int, double, const std::string&),
 );
 
 int main()

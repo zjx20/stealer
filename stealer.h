@@ -28,8 +28,6 @@
 #define STEALER_H_
 #define PP_CAT(x,y) x##y
 #define PP_COMMA() ,
-#define PP_DEC(n) _PP_DEC_I(n)
-#define PP_DEC_H_ 
 #define PP_EMPTY() 
 #define PP_EXPAND(x) x
 #define PP_EXPAND_CAT(x,y) PP_CAT(x, y)
@@ -39,85 +37,27 @@
 #define PP_FOR_EACH_H_ 
 #define PP_FOR_H_ 
 #define PP_H_ 
+#define PP_IF(cond,DO,...) _PP_IF_I(cond, DO, __VA_ARGS__)
 #define PP_IS_EMPTY(...) _PP_IS_EMPTY_I(_PP_IS_EMPTY_HELPER __VA_ARGS__ (),)
 #define PP_IS_EMPTY_H_ 
+#define PP_IS_TUPLE(...) _PP_IS_TUPLE_I(_PP_IS_TUPLE_HELPER __VA_ARGS__)
 #define PP_LAST(...) _PP_LAST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define PP_LPAREN() (
-#define PP_REMOVE_TAIL_COMMA(...) _PP_REMOVE_TAIL_COMMA_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
+#define PP_NOT(cond) _PP_NOT_I(cond)
+#define PP_OVERRIDE(base,branch,...) _PP_OVERRIDE_I(base, branch, __VA_ARGS__)
 #define PP_RPAREN() )
 #define PP_SELECT(i,...) _PP_SELECT_I(i, __VA_ARGS__)
 #define PP_SELECT_H_ 
 #define PP_SEMI() ;
 #define PP_SIZE(...) _PP_SIZE_I(_PP_SIZE_II(__VA_ARGS__, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, ))
 #define PP_SIZE_H_ 
+#define PP_TUPLE_H_ 
+#define PP_TUPLE_TO_VARS(tuple) _PP_TUPLE_TO_VARS_I(_PP_TUPLE_TO_VARS_II() tuple)
 #define PP_UTIL_H_ 
-#define STEALER(name,clz,...) _STEALER_I(name, clz, _STEALER_PREAPPEND_ARGS(clz, PP_REMOVE_TAIL_COMMA(__VA_ARGS__)))
+#define STEALER(name,clz,...) _STEALER_I(name, clz, _STEALER_PREPROCESS_ARGS(clz, __VA_ARGS__))
 #define STEALER_H_ 
-#define _PP_DEC_I(n) _PP_DEC_II_##n
-#define _PP_DEC_II_1 0
-#define _PP_DEC_II_10 9
-#define _PP_DEC_II_11 10
-#define _PP_DEC_II_12 11
-#define _PP_DEC_II_13 12
-#define _PP_DEC_II_14 13
-#define _PP_DEC_II_15 14
-#define _PP_DEC_II_16 15
-#define _PP_DEC_II_17 16
-#define _PP_DEC_II_18 17
-#define _PP_DEC_II_19 18
-#define _PP_DEC_II_2 1
-#define _PP_DEC_II_20 19
-#define _PP_DEC_II_21 20
-#define _PP_DEC_II_22 21
-#define _PP_DEC_II_23 22
-#define _PP_DEC_II_24 23
-#define _PP_DEC_II_25 24
-#define _PP_DEC_II_26 25
-#define _PP_DEC_II_27 26
-#define _PP_DEC_II_28 27
-#define _PP_DEC_II_29 28
-#define _PP_DEC_II_3 2
-#define _PP_DEC_II_30 29
-#define _PP_DEC_II_31 30
-#define _PP_DEC_II_32 31
-#define _PP_DEC_II_33 32
-#define _PP_DEC_II_34 33
-#define _PP_DEC_II_35 34
-#define _PP_DEC_II_36 35
-#define _PP_DEC_II_37 36
-#define _PP_DEC_II_38 37
-#define _PP_DEC_II_39 38
-#define _PP_DEC_II_4 3
-#define _PP_DEC_II_40 39
-#define _PP_DEC_II_41 40
-#define _PP_DEC_II_42 41
-#define _PP_DEC_II_43 42
-#define _PP_DEC_II_44 43
-#define _PP_DEC_II_45 44
-#define _PP_DEC_II_46 45
-#define _PP_DEC_II_47 46
-#define _PP_DEC_II_48 47
-#define _PP_DEC_II_49 48
-#define _PP_DEC_II_5 4
-#define _PP_DEC_II_50 49
-#define _PP_DEC_II_51 50
-#define _PP_DEC_II_52 51
-#define _PP_DEC_II_53 52
-#define _PP_DEC_II_54 53
-#define _PP_DEC_II_55 54
-#define _PP_DEC_II_56 55
-#define _PP_DEC_II_57 56
-#define _PP_DEC_II_58 57
-#define _PP_DEC_II_59 58
-#define _PP_DEC_II_6 5
-#define _PP_DEC_II_60 59
-#define _PP_DEC_II_61 60
-#define _PP_DEC_II_62 61
-#define _PP_DEC_II_63 62
-#define _PP_DEC_II_64 63
-#define _PP_DEC_II_7 6
-#define _PP_DEC_II_8 7
-#define _PP_DEC_II_9 8
+#define STEAL_FIELD(...) (_STEAL_FIELD, __VA_ARGS__)
+#define STEAL_METHOD(...) (_STEAL_METHOD, __VA_ARGS__)
 #define _PP_FIRST_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_FIRST_II_, is_empty)(__VA_ARGS__))
 #define _PP_FIRST_II_0(x,...) x
 #define _PP_FIRST_II_1(...) 
@@ -256,6 +196,10 @@
 #define _PP_FOR_PP_CAT(x,y) x##y
 #define _PP_FOR_PP_EXPAND(x) x
 #define _PP_FOR_PP_EXPAND_CAT(x,y) _PP_FOR_PP_CAT(x, y)
+#define _PP_IF_I(cond,DO,...) PP_OVERRIDE(_PP_IF_II_, cond, DO, __VA_ARGS__)
+#define _PP_IF_III(x) x
+#define _PP_IF_II_0(...) 
+#define _PP_IF_II_1(DO,...) _PP_IF_III(DO(__VA_ARGS__))
 #define _PP_IS_EMPTY_DEF_1 1, PP_EMPTY
 #define _PP_IS_EMPTY_DEF__PP_IS_EMPTY_HELPER 0, PP_EMPTY
 #define _PP_IS_EMPTY_HELPER() 1
@@ -263,16 +207,21 @@
 #define _PP_IS_EMPTY_II(id) id
 #define _PP_IS_EMPTY_PP_CAT(x,y) x##y
 #define _PP_IS_EMPTY_PP_EXPAND_CAT(x,y,...) _PP_IS_EMPTY_PP_CAT(x, y)
+#define _PP_IS_TUPLE_DEF_1 1, PP_EMPTY
+#define _PP_IS_TUPLE_DEF__PP_IS_TUPLE_HELPER 0, PP_EMPTY
+#define _PP_IS_TUPLE_HELPER(...) 1
+#define _PP_IS_TUPLE_I(test,...) _PP_IS_TUPLE_II( PP_SELECT(1, _PP_IS_TUPLE_PP_EXPAND_CAT(_PP_IS_TUPLE_DEF_, test)))
+#define _PP_IS_TUPLE_II(x) x
+#define _PP_IS_TUPLE_PP_CAT(x,y) x##y
+#define _PP_IS_TUPLE_PP_EXPAND_CAT(x,y,...) _PP_IS_TUPLE_PP_CAT(x, y)
 #define _PP_LAST_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_LAST_II_, is_empty)(__VA_ARGS__))
 #define _PP_LAST_II_0(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
 #define _PP_LAST_II_1(...) 
-#define _PP_REMOVE_TAIL_COMMA_FOR_DO(i,...) PP_SELECT(i, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_II_, is_empty) (__VA_ARGS__))
-#define _PP_REMOVE_TAIL_COMMA_III(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_IIII_, is_empty) (__VA_ARGS__))
-#define _PP_REMOVE_TAIL_COMMA_IIII_0(...) __VA_ARGS__
-#define _PP_REMOVE_TAIL_COMMA_IIII_1(...) PP_FOR(PP_DEC(PP_SIZE(__VA_ARGS__)), _PP_REMOVE_TAIL_COMMA_FOR_DO, PP_COMMA, __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_II_0(...) _PP_REMOVE_TAIL_COMMA_III( PP_IS_EMPTY(PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)), __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_II_1(...) __VA_ARGS__
+#define _PP_NOT_I(cond) _PP_NOT_II_##cond
+#define _PP_NOT_II_0 1
+#define _PP_NOT_II_1 0
+#define _PP_OVERRIDE_I(base,branch,...) _PP_OVERRIDE_II(base##branch (__VA_ARGS__))
+#define _PP_OVERRIDE_II(x) x
 #define _PP_SELECT_I(i,...) _PP_SELECT_PP_EXPAND(_PP_SELECT_PP_EXPAND_CAT(_PP_SELECT_II_, i)(__VA_ARGS__,))
 #define _PP_SELECT_II_0(...) 
 #define _PP_SELECT_II_1(e0,...) e0
@@ -344,55 +293,56 @@
 #define _PP_SELECT_PP_EXPAND_CAT(x,y) _PP_SELECT_PP_CAT(x, y)
 #define _PP_SIZE_I(x) x
 #define _PP_SIZE_II(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15,e16,e17,e18,e19,e20,e21,e22,e23,e24,e25,e26,e27,e28,e29,e30,e31,e32,e33,e34,e35,e36,e37,e38,e39,e40,e41,e42,e43,e44,e45,e46,e47,e48,e49,e50,e51,e52,e53,e54,e55,e56,e57,e58,e59,e60,e61,e62,e63,size,...) size
+#define _PP_TUPLE_TO_VARS_I(x) x
+#define _PP_TUPLE_TO_VARS_II() _PP_TUPLE_TO_VARS_III
+#define _PP_TUPLE_TO_VARS_III(...) __VA_ARGS__
 #define _STEALER_ARGS_ONLY_NAMES(...) _STEALER_ARGS_ONLY_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_ONLY_NAMES_DO(i,arg) a##i
-#define _STEALER_ARGS_ONLY_NAMES_I(is_empty,...) _STEALER_EXPAND( _STEALER_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) (__VA_ARGS__))
+#define _STEALER_ARGS_ONLY_NAMES_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_STEALER_ARGS_ONLY_NAMES_II_, is_empty) (__VA_ARGS__))
 #define _STEALER_ARGS_ONLY_NAMES_II_0(...) PP_FOR_EACH(_STEALER_ARGS_ONLY_NAMES_DO, PP_COMMA, __VA_ARGS__)
 #define _STEALER_ARGS_ONLY_NAMES_II_1(...) 
 #define _STEALER_ARGS_WITH_NAMES(...) _STEALER_ARGS_WITH_NAMES_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _STEALER_ARGS_WITH_NAMES_DO(i,arg) arg a##i
-#define _STEALER_ARGS_WITH_NAMES_I(is_empty,...) _STEALER_EXPAND( _STEALER_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) (__VA_ARGS__))
+#define _STEALER_ARGS_WITH_NAMES_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_STEALER_ARGS_WITH_NAMES_II_, is_empty) (__VA_ARGS__))
 #define _STEALER_ARGS_WITH_NAMES_II_0(...) PP_FOR_EACH(_STEALER_ARGS_WITH_NAMES_DO, PP_COMMA, __VA_ARGS__)
 #define _STEALER_ARGS_WITH_NAMES_II_1(...) 
-#define _STEALER_CAT(x,y) x##y
-#define _STEALER_DECL_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_DECL_FIELDS_DO_, __VA_ARGS__)
-#define _STEALER_DECL_FIELDS_DO_0(...) 
-#define _STEALER_DECL_FIELDS_DO_1(id,clz,type,name) type& name;
-#define _STEALER_EXPAND(x) x
-#define _STEALER_EXPAND_CAT(x,y) _STEALER_CAT(x, y)
-#define _STEALER_FIELD_GETTERS(...) _STEALER_FILTER_FIELDS(_STEALER_FIELD_GETTERS_DO_, __VA_ARGS__)
-#define _STEALER_FIELD_GETTERS_DO_0(...) 
-#define _STEALER_FIELD_GETTERS_DO_1(id,clz,type,name) ::stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { return _obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL); }
+#define _STEALER_DECL_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_DECL_FIELDS_DO, __VA_ARGS__)
+#define _STEALER_DECL_FIELDS_DO(id,clz,type,name) type& name;
+#define _STEALER_FIELD_GETTERS(...) _STEALER_FILTER_FIELDS(_STEALER_FIELD_GETTERS_DO, __VA_ARGS__)
+#define _STEALER_FIELD_GETTERS_DO(id,clz,type,name) ::stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { return _obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL); }
 #define _STEALER_FILTER(CHECK,DO,...) PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_FILTER_DO, PP_EMPTY, CHECK, DO, __VA_ARGS__)
-#define _STEALER_FILTER_DO(i,CHECK,DO,...) PP_EXPAND_CAT(DO, PP_EXPAND_CAT(CHECK, PP_SELECT(i, __VA_ARGS__)) (PP_EXPAND_CAT(_STEALER_PRINT_, PP_SELECT(i, __VA_ARGS__))) )
-#define _STEALER_FILTER_FIELDS(DO,...) _STEALER_FILTER(_STEALER_IS_FIELD_, DO, __VA_ARGS__)
-#define _STEALER_FILTER_METHODS(DO,...) _STEALER_FILTER(_STEALER_IS_METHOD_, DO, __VA_ARGS__)
+#define _STEALER_FILTER_DO(i,...) PP_EXPAND(_STEALER_FILTER_DO_I(i, __VA_ARGS__))
+#define _STEALER_FILTER_DO_I(i,CHECK,DO,...) _STEALER_FILTER_DO_II(CHECK, DO, PP_SELECT(i, __VA_ARGS__))
+#define _STEALER_FILTER_DO_II(CHECK,DO,x) PP_IF(PP_IS_TUPLE(x), _STEALER_FILTER_DO_III, CHECK, DO, PP_TUPLE_TO_VARS(x))
+#define _STEALER_FILTER_DO_III(CHECK,DO,...) PP_EXPAND(_STEALER_FILTER_DO_IV(CHECK, DO, __VA_ARGS__))
+#define _STEALER_FILTER_DO_IV(CHECK,DO,type,...) _STEALER_FILTER_DO_V(PP_EXPAND_CAT(CHECK, type)(), DO, __VA_ARGS__)
+#define _STEALER_FILTER_DO_V(cond,DO,...) PP_EXPAND(PP_EXPAND_CAT(_STEALER_FILTER_DO_VI_, cond)(DO, __VA_ARGS__))
+#define _STEALER_FILTER_DO_VI_0(...) 
+#define _STEALER_FILTER_DO_VI_1(DO,...) PP_EXPAND(PP_CAT(DO,)(__VA_ARGS__))
+#define _STEALER_FILTER_FIELDS(DO,...) _STEALER_FILTER(_STEALER_IS_FIELD, DO, __VA_ARGS__)
+#define _STEALER_FILTER_METHODS(DO,...) _STEALER_FILTER(_STEALER_IS_METHOD, DO, __VA_ARGS__)
 #define _STEALER_I(name,clz,...) namespace stealer { _STEALER_PREPARE_FIELDS(__VA_ARGS__) _STEALER_PREPARE_METHODS(__VA_ARGS__) } class name { typedef clz clz_type; clz_type* _obj; public: explicit name(clz_type* obj) : _obj(obj) _STEALER_INITIALIZOR(__VA_ARGS__) {} explicit name(clz_type& obj) : _obj(&obj) _STEALER_INITIALIZOR(__VA_ARGS__) {} _STEALER_DECL_FIELDS(__VA_ARGS__) _STEALER_FIELD_GETTERS(__VA_ARGS__) _STEALER_METHODS(__VA_ARGS__) }
-#define _STEALER_INITIALIZOR(...) _STEALER_FILTER_FIELDS(_STEALER_INITIALIZOR_DO_, __VA_ARGS__)
-#define _STEALER_INITIALIZOR_DO_0(...) 
-#define _STEALER_INITIALIZOR_DO_1(id,clz,type,name) , name(_stealer##name())
-#define _STEALER_IS_FIELD_FIELD(...) 1
-#define _STEALER_IS_FIELD_METHOD(...) 0
-#define _STEALER_IS_METHOD_FIELD(...) 0
-#define _STEALER_IS_METHOD_METHOD(...) 1
-#define _STEALER_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_METHOD_DO_, __VA_ARGS__)
-#define _STEALER_METHOD_DO_0(...) 
-#define _STEALER_METHOD_DO_1(id,clz,ret_type,name,...) ::stealer::_STEALER_SLOT(id)::return_type name( _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { return (_obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL)) (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); }
-#define _STEALER_PREAPPEND_ARGS(arg,...) PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_PREAPPEND_ARGS_DO, PP_COMMA, arg, __VA_ARGS__)
-#define _STEALER_PREAPPEND_ARGS_DO(i,arg,...) PP_EXPAND_CAT(_STEALER_TYPE_, PP_SELECT(i, __VA_ARGS__)) (i, arg, PP_EXPAND_CAT(_STEALER_PRINT_, PP_SELECT(i, __VA_ARGS__)))
-#define _STEALER_PREPARE_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO_, __VA_ARGS__)
-#define _STEALER_PREPARE_FIELD_DO_0(...) 
-#define _STEALER_PREPARE_FIELD_DO_1(id,clz,type,name) struct _STEALER_SLOT(id) { typedef type value_type; typedef value_type(clz::*shape); friend shape __reproduce(_STEALER_SLOT(id)*); }; template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
-#define _STEALER_PREPARE_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO_, __VA_ARGS__)
-#define _STEALER_PREPARE_METHOD_DO_0(...) 
-#define _STEALER_PREPARE_METHOD_DO_1(id,clz,ret_type,name,...) struct _STEALER_SLOT(id) { typedef ret_type return_type; typedef ret_type(clz::*shape)(__VA_ARGS__); friend shape __reproduce(_STEALER_SLOT(id)*); }; template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
-#define _STEALER_PRINT_FIELD(...) __VA_ARGS__
-#define _STEALER_PRINT_METHOD(...) __VA_ARGS__
+#define _STEALER_INITIALIZOR(...) _STEALER_FILTER_FIELDS(_STEALER_INITIALIZOR_DO, __VA_ARGS__)
+#define _STEALER_INITIALIZOR_DO(id,clz,type,name) , name(_stealer##name())
+#define _STEALER_IS_FIELD_STEAL_FIELD(...) 1
+#define _STEALER_IS_FIELD_STEAL_METHOD(...) 0
+#define _STEALER_IS_METHOD_STEAL_FIELD(...) 0
+#define _STEALER_IS_METHOD_STEAL_METHOD(...) 1
+#define _STEALER_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_METHOD_DO, __VA_ARGS__)
+#define _STEALER_METHOD_DO(id,clz,ret_type,name,...) ::stealer::_STEALER_SLOT(id)::return_type name( _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { return (_obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL)) (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); }
+#define _STEALER_PREPARE_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO, __VA_ARGS__)
+#define _STEALER_PREPARE_FIELD_DO(id,clz,type,name) struct _STEALER_SLOT(id) { typedef type value_type; typedef value_type(clz::*shape); friend shape __reproduce(_STEALER_SLOT(id)*); }; template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
+#define _STEALER_PREPARE_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO, __VA_ARGS__)
+#define _STEALER_PREPARE_METHOD_DO(id,clz,ret_type,name,...) struct _STEALER_SLOT(id) { typedef ret_type return_type; typedef ret_type(clz::*shape)(__VA_ARGS__); friend shape __reproduce(_STEALER_SLOT(id)*); }; template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
+#define _STEALER_PREPROCESS_ARGS(clz,...) PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_PREPROCESS_ARGS_DO, PP_COMMA, clz, __VA_ARGS__)
+#define _STEALER_PREPROCESS_ARGS_DO(i,...) _STEALER_PREPROCESS_ARGS_DO_I( _STEALER_PREPROCESS_ARGS_DO_II(i, __VA_ARGS__))
+#define _STEALER_PREPROCESS_ARGS_DO_I(...) __VA_ARGS__
+#define _STEALER_PREPROCESS_ARGS_DO_II(i,clz,...) PP_IF(PP_IS_TUPLE(PP_SELECT(i, __VA_ARGS__)), _STEALER_PREPROCESS_ARGS_DO_III, i, clz, PP_TUPLE_TO_VARS(PP_SELECT(i, __VA_ARGS__)))
+#define _STEALER_PREPROCESS_ARGS_DO_III(id,clz,...) PP_EXPAND(_STEALER_PREPROCESS_ARGS_DO_IV(id, clz, __VA_ARGS__))
+#define _STEALER_PREPROCESS_ARGS_DO_IV(id,clz,type,...) (type, id, clz, __VA_ARGS__)
 #define _STEALER_SLOT(id) _STEALER_SLOT_I(id, __LINE__)
 #define _STEALER_SLOT_I(id,line) _STEALER_SLOT_II(id, line)
 #define _STEALER_SLOT_II(id,line) _slot_##id##_##line
-#define _STEALER_TYPE_FIELD(...) FIELD
-#define _STEALER_TYPE_METHOD(...) METHOD
 
 namespace stealer {
 

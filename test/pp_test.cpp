@@ -57,18 +57,15 @@
 #define FOR_DO1(i, ...) i
 #define FOR_DO2(i, ...) PP_EXPAND_CAT(for_, PP_SELECT(i, ##__VA_ARGS__))
 #define FOR_EACH_DO1(i, arg) arg
-// #define FOR_EACH_DO(i, arg) PP_EXPAND_CAT(i##_, PP_EXPAND_CAT(PP_DEC(arg),))
-#define FOR_EACH_DO2(i, arg) PP_EXPAND_CAT(i##_, PP_EXPAND_CAT(PP_DEC(arg),))
+#define FOR_EACH_DO2(i, arg) PP_EXPAND_CAT(i##_, arg)
+#define OVERRIDE1(...) PP_SIZE(__VA_ARGS__)
+#define OVERRIDE2(...) PP_LAST(__VA_ARGS__)
 
-void test()
+void test_basic()
 {
     PP_TEST( PP_SIZE(hello), "1" );
     PP_TEST( PP_SIZE(hello, stealer), "2" );
     PP_TEST( PP_SIZE(hello, stealer, !), "3" );
-
-    PP_TEST( PP_DEC(1), "0" );
-    PP_TEST( PP_DEC(50), "49" );
-    PP_TEST( PP_DEC(64), "63" );
 
     PP_TEST( PP_SELECT(0, a, b, c), "" );
     PP_TEST( PP_SELECT(1, a, b, c), "a" );
@@ -79,7 +76,7 @@ void test()
     PP_TEST( PP_FOR(3, FOR_DO2, FOR_SEP, a, b, c), "for_a | for_b | for_c" );
 
     PP_TEST( PP_FOR_EACH(FOR_EACH_DO1, FOR_SEP, 1, 5, 64), "1 | 5 | 64" );
-    PP_TEST( PP_FOR_EACH(FOR_EACH_DO2, FOR_SEP, 1, 5, 64), "1_0 | 2_4 | 3_63" );
+    PP_TEST( PP_FOR_EACH(FOR_EACH_DO2, FOR_SEP, 1, 5, 64), "1_1 | 2_5 | 3_64" );
 
     PP_TEST( PP_CAT(x, y), "xy" );
     PP_TEST( PP_EXPAND(PP_CAT(EM, PTY)), "" );
@@ -97,20 +94,121 @@ void test()
     PP_TEST( PP_IS_EMPTY("a"), "0" );
     PP_TEST( PP_IS_EMPTY(a, b), "0" );
     PP_TEST( PP_IS_EMPTY(a, b, c), "0" );
+    //PP_TEST( PP_IS_EMPTY((a, b, c)), "0" );   // fails to handle this case
     PP_TEST( PP_IS_EMPTY( ), "1" );
 
     PP_TEST( PP_FIRST(a, b, c), "a" );
     PP_TEST( PP_LAST(a, b, c), "c" );
 
-    PP_TEST( PP_REMOVE_TAIL_COMMA( ), "" );
-    PP_TEST( PP_REMOVE_TAIL_COMMA(a, b, c), "a, b, c" );
-    PP_TEST( PP_REMOVE_TAIL_COMMA(a, b, c, ), "a , b , c" );
+    PP_TEST( PP_TUPLE_TO_VARS(( )), "" );
+    PP_TEST( PP_TUPLE_TO_VARS((a)), "a" );
+    PP_TEST( PP_TUPLE_TO_VARS((a, b, c)), "a, b, c" );
+
+    PP_TEST( PP_OVERRIDE(OVERRIDE, 1, a, b, c, d), "4" );
+    PP_TEST( PP_OVERRIDE(OVERRIDE, 2, a, b, c, d), "d" );
+
+    PP_TEST( PP_IF(PP_SELECT(2, 1, 0), PP_SIZE, a, b, c), "" );
+    PP_TEST( PP_IF(1, PP_SIZE, a, b, c), "3" );
+
+    PP_TEST( PP_IS_TUPLE(), "0" );
+    PP_TEST( PP_IS_TUPLE(a, b, c), "0" );
+    PP_TEST( PP_IS_TUPLE(,), "0" );
+    PP_TEST( PP_IS_TUPLE(()), "1" );
+    PP_TEST( PP_IS_TUPLE((a)), "1" );
+    PP_TEST( PP_IS_TUPLE((a, b, c)), "1" );
+    PP_TEST( PP_IS_TUPLE((a, b,)), "1" );
+
+    PP_TEST( PP_NOT(0), "1" );
+    PP_TEST( PP_NOT(1), "0" );
+    PP_TEST( PP_NOT(PP_IS_EMPTY()), "0" );
+    PP_TEST( PP_NOT(PP_IS_EMPTY(a,b,c)), "1" );
+}
+
+void test_fields_and_methods()
+{
+
+#define ARGS(...) (__VA_ARGS__)
+#define FAM_TEST1(...) PP_SIZE(__VA_ARGS__)
+
+#define FAM_TEST2(...) \
+        PP_FOR(PP_SIZE(__VA_ARGS__), FAM_TEST2_DO, PP_COMMA, __VA_ARGS__)
+#define FAM_TEST2_DO(i, ...) \
+        PP_SIZE(PP_TUPLE_TO_VARS(PP_SELECT(i, __VA_ARGS__)))
+
+#define FAM_TEST3(CHECK, DO, ...) \
+        PP_FOR(PP_SIZE(__VA_ARGS__), FAM_TEST3_DO, PP_COMMA, \
+                CHECK, DO, __VA_ARGS__)
+#define FAM_TEST3_DO(i, ...) \
+        PP_EXPAND(FAM_TEST3_DO_I(i, __VA_ARGS__))
+#define FAM_TEST3_DO_I(i, CHECK, DO, ...) \
+        FAM_TEST3_DO_II(CHECK, DO, \
+                PP_TUPLE_TO_VARS(PP_SELECT(i, __VA_ARGS__)))
+#define FAM_TEST3_DO_II(CHECK, DO, ...) \
+        PP_EXPAND(FAM_TEST3_DO_III(CHECK, DO, __VA_ARGS__))
+#define FAM_TEST3_DO_III(CHECK, DO, type, ...) \
+        PP_IF(PP_EXPAND_CAT(CHECK, type)(), DO, __VA_ARGS__)
+
+#define FIELD(...) (_FIELD, ##__VA_ARGS__)
+#define METHOD(...) (_METHOD, ##__VA_ARGS__)
+#define IS_FIELD_FIELD(...) 1
+#define IS_FIELD_METHOD(...) 0
+#define IS_METHOD_FIELD(...) 0
+#define IS_METHOD_METHOD(...) 1
+#define HANDLE_FIELD(type, name) HANDLING_FIELD, type, name
+#define HANDLE_METHOD(return_type, name, ...) \
+        HANDLING_METHOD, return_type, name, PP_SIZE(__VA_ARGS__) args
+
+    PP_TEST( PP_SIZE(ARGS(a,b), ARGS(x,y,z)), "2" );
+    PP_TEST( FAM_TEST1(ARGS(a,b), ARGS(x,y,z)), "2" );
+    PP_TEST( FAM_TEST2(ARGS(a,b), ARGS(x,y,z)), "2 , 3" );
+
+    PP_TEST( FAM_TEST3(IS_FIELD, HANDLE_FIELD, METHOD(int, a)), "" );
+    PP_TEST( FAM_TEST3(IS_FIELD, HANDLE_FIELD, FIELD(int, a)), \
+            "HANDLING_FIELD, int, a" );
+    PP_TEST( FAM_TEST3(IS_FIELD, HANDLE_FIELD, 
+                    FIELD(int, a), FIELD(float, b), METHOD(int, a)), 
+            "HANDLING_FIELD, int, a , HANDLING_FIELD, float, b ," );
+
+    PP_TEST( FAM_TEST3(IS_METHOD, HANDLE_METHOD, FIELD(int, a)), "" );
+    PP_TEST( FAM_TEST3(IS_METHOD, HANDLE_METHOD, METHOD(int, a)), 
+            "HANDLING_METHOD, int, a, 1 args" );
+    PP_TEST( FAM_TEST3(IS_METHOD, HANDLE_METHOD, METHOD(int, a, int, int)), 
+            "HANDLING_METHOD, int, a, 2 args" );
+    PP_TEST( FAM_TEST3(IS_METHOD, HANDLE_METHOD, 
+                    METHOD(int, a, float), METHOD(float, b), FIELD(int, a)), 
+            "HANDLING_METHOD, int, a, 1 args , "
+            "HANDLING_METHOD, float, b, 1 args ," );
+}
+
+void test_insert_elem_to_second_place_of_tuple()
+{
+
+#define IETSPOT_TEST1(elem, tuple) \
+        IETSPOT_TEST1_I(elem, PP_TUPLE_TO_VARS(tuple))
+#define IETSPOT_TEST1_I(elem, ...) \
+        PP_EXPAND(IETSPOT_TEST1_II(elem, __VA_ARGS__))
+#define IETSPOT_TEST1_II(elem, first, ...) (first, elem, __VA_ARGS__)
+
+#define IETSPOT_TEST2(elem, ...) \
+        PP_FOR(PP_SIZE(__VA_ARGS__), IETSPOT_TEST2_I, PP_COMMA, elem, \
+                __VA_ARGS__)
+#define IETSPOT_TEST2_I(i, ...) \
+        PP_EXPAND(IETSPOT_TEST2_II(i, __VA_ARGS__))
+#define IETSPOT_TEST2_II(i, elem, ...) \
+        IETSPOT_TEST1(elem, PP_SELECT(i, __VA_ARGS__))
+
+    PP_TEST( IETSPOT_TEST1(z, (a, b, c)), "(a, z, b, c)" );
+
+    PP_TEST( IETSPOT_TEST2(z, FIELD(int, a), METHOD(float, b)),
+            "(_FIELD, z, int, a) , (_METHOD, z, float, b)" );
 }
 
 int main()
 {
     try {
-        test();
+        test_basic();
+        test_fields_and_methods();
+        test_insert_elem_to_second_place_of_tuple();
     } catch (std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

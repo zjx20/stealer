@@ -35,8 +35,6 @@
 #ifndef PP_FOR_EACH_H_
 #define PP_FOR_EACH_H_
 
-#include "util.h"
-#include "size.h"
 #include "select.h"
 
 // std::string SEP() {return ",";}

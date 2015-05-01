@@ -38,11 +38,16 @@
 #include "size.h"
 #include "is_empty.h"
 #include "select.h"
-#include "dec.h"
 
 #define PP_EXPAND(x) x
 #define PP_CAT(x, y) x##y
 #define PP_EXPAND_CAT(x, y) PP_CAT(x, y)
+
+#define PP_EMPTY()
+#define PP_COMMA()  ,
+#define PP_LPAREN() (
+#define PP_RPAREN() )
+#define PP_SEMI()   ;
 
 #define PP_FIRST(...) _PP_FIRST_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
 #define _PP_FIRST_I(is_empty, ...) \
@@ -56,30 +61,21 @@
 #define _PP_LAST_II_1(...) // nothing
 #define _PP_LAST_II_0(...) PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)
 
-#define PP_REMOVE_TAIL_COMMA(...) \
-        _PP_REMOVE_TAIL_COMMA_I(PP_IS_EMPTY(__VA_ARGS__), __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_I(is_empty, ...) \
-        PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_II_, is_empty) \
-                (__VA_ARGS__))
-#define _PP_REMOVE_TAIL_COMMA_II_1(...) __VA_ARGS__
-#define _PP_REMOVE_TAIL_COMMA_II_0(...) \
-        _PP_REMOVE_TAIL_COMMA_III( \
-                PP_IS_EMPTY(PP_SELECT(PP_SIZE(__VA_ARGS__), __VA_ARGS__)), \
-                        __VA_ARGS__)
-#define _PP_REMOVE_TAIL_COMMA_III(is_empty, ...) \
-        PP_EXPAND(PP_EXPAND_CAT(_PP_REMOVE_TAIL_COMMA_IIII_, is_empty) \
-                (__VA_ARGS__))
-#define _PP_REMOVE_TAIL_COMMA_IIII_0(...) __VA_ARGS__
-#define _PP_REMOVE_TAIL_COMMA_IIII_1(...) \
-        PP_FOR(PP_DEC(PP_SIZE(__VA_ARGS__)), _PP_REMOVE_TAIL_COMMA_FOR_DO, \
-                PP_COMMA, __VA_ARGS__)
+#define PP_OVERRIDE(base, branch, ...) \
+        _PP_OVERRIDE_I(base, branch, __VA_ARGS__)
+#define _PP_OVERRIDE_I(base, branch, ...) \
+        _PP_OVERRIDE_II(base##branch (__VA_ARGS__))
+#define _PP_OVERRIDE_II(x) x
 
-#define _PP_REMOVE_TAIL_COMMA_FOR_DO(i, ...) PP_SELECT(i, __VA_ARGS__)
+#define PP_IF(cond, DO, ...) _PP_IF_I(cond, DO, __VA_ARGS__)
+#define _PP_IF_I(cond, DO, ...) PP_OVERRIDE(_PP_IF_II_, cond, DO, __VA_ARGS__)
+#define _PP_IF_II_0(...) // nothing
+#define _PP_IF_II_1(DO, ...) _PP_IF_III(DO(__VA_ARGS__))
+#define _PP_IF_III(x) x
 
-#define PP_EMPTY()
-#define PP_COMMA()  ,
-#define PP_LPAREN() (
-#define PP_RPAREN() )
-#define PP_SEMI()   ;
+#define PP_NOT(cond) _PP_NOT_I(cond)
+#define _PP_NOT_I(cond) _PP_NOT_II_##cond
+#define _PP_NOT_II_0 1
+#define _PP_NOT_II_1 0
 
 #endif /* PP_UTIL_H_ */
