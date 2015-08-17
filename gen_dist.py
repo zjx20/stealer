@@ -77,7 +77,7 @@ def gen_content():
     result += '#define STEALER_H_\n'
     result += command(get_defines_cmd)
     result += command(get_content_cmd)
-    result += '#endif'
+    result += '#endif\n'
     
     return result
 
