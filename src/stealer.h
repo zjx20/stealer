@@ -67,24 +67,19 @@
 //   int value = a->*get((A_f*)NULL); // 100
 // }
 
-namespace stealer {
-
-template <typename Slot, typename Slot::shape Key>
-struct mould
-{
-    friend typename Slot::shape __reproduce(Slot*)
-    {
-        return Key;
-    }
-};
-
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 #define _STEALER_SLOT(id) _STEALER_SLOT_I(id, __LINE__)
 #define _STEALER_SLOT_I(id, line) _STEALER_SLOT_II(id, line)
 #define _STEALER_SLOT_II(id, line) _slot_##id##_##line
+
+#define _STEALER_MOULD _STEALER_MOULD_I(__LINE__)
+#define _STEALER_MOULD_I(line) _STEALER_MOULD_II(line)
+#define _STEALER_MOULD_II(line) _mould_##line
+
+#define _STEALER_REPRODUCE _STEALER_REPRODUCE_I(__LINE__)
+#define _STEALER_REPRODUCE_I(line) _STEALER_REPRODUCE_II(line)
+#define _STEALER_REPRODUCE_II(line) __reproduce_##line
 
 ///////////////////////////////////////////////////////////////////////////////
 #define _STEALER_IS_FIELD_STEAL_FIELD(...) 1
@@ -144,9 +139,9 @@ struct mould
         struct _STEALER_SLOT(id) { \
             typedef type value_type; \
             typedef value_type(clz::*shape); \
-            friend shape __reproduce(_STEALER_SLOT(id)*); \
+            friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); \
         }; \
-        template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
+        template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
 
 #define _STEALER_PREPARE_FIELDS(...) \
         _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO, __VA_ARGS__)
@@ -157,9 +152,9 @@ struct mould
         struct _STEALER_SLOT(id) { \
             typedef ret_type return_type; \
             typedef ret_type(clz::*shape)(__VA_ARGS__); \
-            friend shape __reproduce(_STEALER_SLOT(id)*); \
+            friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); \
         }; \
-        template struct ::stealer::mould<_STEALER_SLOT(id), &clz::name>;
+        template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
 
 #define _STEALER_PREPARE_METHODS(...) \
         _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO, __VA_ARGS__)
@@ -181,8 +176,9 @@ struct mould
 
 ///////////////////////////////////////////////////////////////////////////////
 #define _STEALER_FIELD_GETTERS_DO(id, clz, type, name) \
-        ::stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { \
-            return _obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL); \
+        stealer::_STEALER_SLOT(id)::value_type& _stealer##name() { \
+            return _obj->*_STEALER_REPRODUCE( \
+                    (stealer::_STEALER_SLOT(id)*)NULL); \
         }
 
 #define _STEALER_FIELD_GETTERS(...) \
@@ -215,10 +211,11 @@ struct mould
 
 
 #define _STEALER_METHOD_DO(id, clz, ret_type, name, ...) \
-        ::stealer::_STEALER_SLOT(id)::return_type name( \
+        stealer::_STEALER_SLOT(id)::return_type name( \
                 _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { \
-            return (_obj->*__reproduce((::stealer::_STEALER_SLOT(id)*)NULL)) \
-                    (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); \
+            return (_obj->*_STEALER_REPRODUCE( \
+                    (stealer::_STEALER_SLOT(id)*)NULL)) \
+                            (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); \
         }
 
 #define _STEALER_METHODS(...) \
@@ -233,6 +230,12 @@ struct mould
 
 #define _STEALER_I(name, clz, ...) \
         namespace stealer { \
+            template <typename Slot, typename Slot::shape Key> \
+            struct _STEALER_MOULD { \
+                friend typename Slot::shape _STEALER_REPRODUCE(Slot*) { \
+                    return Key; \
+                } \
+            }; \
             _STEALER_PREPARE_FIELDS(__VA_ARGS__) \
             _STEALER_PREPARE_METHODS(__VA_ARGS__) \
         } \

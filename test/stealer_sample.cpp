@@ -82,6 +82,8 @@ private:
 
 typedef std::map<int, char> map_t;
 
+namespace myspace {
+
 STEALER(stealer_private_t, private_t,
        STEAL_FIELD(int, _private_int),
        STEAL_FIELD(std::string, _private_string),
@@ -91,6 +93,8 @@ STEALER(stealer_private_t, private_t,
        STEAL_METHOD(int, private_method3, int, double, const std::string&),
 );
 
+} // namespace myspace
+
 int main()
 {
     private_t inst("private!");
@@ -98,7 +102,7 @@ int main()
 
     std::cout << std::endl;
 
-    stealer_private_t steal(inst);
+    myspace::stealer_private_t steal(inst);
 
     // read private fields
     std::cout <<
