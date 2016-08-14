@@ -42,6 +42,16 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
             return a;
         }
     
+        void private_const_method() const
+        {
+            std::cout << "in private_const_method()!" << std::endl;
+        }
+    
+        void private_volatile_method() volatile
+        {
+            std::cout << "in private_volatile_method()!" << std::endl;
+        }
+    
     private:
         std::string _private_string;
         int _private_int;
@@ -59,6 +69,10 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
             /* STEAL_METHOD(return_type_of_the_method, method_name, arg1, arg2, ...) */
             STEAL_METHOD(void, private_method),
             STEAL_METHOD(int, private_method3, int, double, const std::string&),
+            
+            /* STEAL_METHOD() family */
+            STEAL_CONST_METHOD(void, private_const_method),
+            STEAL_QUALIFIED_METHOD(volatile, void, private_volatile_method),
     );
     ```
     
@@ -75,6 +89,8 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
         
         void private_method() {/*...*/}
         int private_method3(int a1, double a2, const std::string& a3) {/*...*/}
+        void private_const_method() const {/*...*/}
+        void private_volatile_method() volatile {/*...*/}
         
         int& _private_int;
         std::string& _private_string;
@@ -103,6 +119,8 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
         // call private methods
         steal.private_method();
         steal.private_method3(100, 123.4, "foo");
+        steal.private_const_method();
+        steal.private_volatile_method();
     
         std::cout << std::endl;
     
@@ -129,6 +147,8 @@ No installation is needed, just copy and include the *stealer.h*. Here is a smal
     
     in private_method()!
     in private_method3(), a = 100, b = 123.4, str = foo
+    in private_const_method()!
+    in private_volatile_method()!
     
     _private_string: stole!
     _private_int: 0

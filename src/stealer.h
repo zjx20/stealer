@@ -148,10 +148,10 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define _STEALER_PREPARE_METHOD_DO(id, clz, ret_type, name, ...) \
+#define _STEALER_PREPARE_METHOD_DO(id, clz, qualifier, ret_type, name, ...) \
         struct _STEALER_SLOT(id) { \
             typedef ret_type return_type; \
-            typedef ret_type(clz::*shape)(__VA_ARGS__); \
+            typedef ret_type(clz::*shape)(__VA_ARGS__) qualifier; \
             friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); \
         }; \
         template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
@@ -210,9 +210,9 @@
 #define _STEALER_ARGS_ONLY_NAMES_DO(i, arg) a##i
 
 
-#define _STEALER_METHOD_DO(id, clz, ret_type, name, ...) \
+#define _STEALER_METHOD_DO(id, clz, qualifier, ret_type, name, ...) \
         stealer::_STEALER_SLOT(id)::return_type name( \
-                _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { \
+                _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) qualifier { \
             return (_obj->*_STEALER_REPRODUCE( \
                     (stealer::_STEALER_SLOT(id)*)NULL)) \
                             (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); \
@@ -223,7 +223,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 #define STEAL_FIELD(...) (_STEAL_FIELD, __VA_ARGS__)
-#define STEAL_METHOD(...) (_STEAL_METHOD, __VA_ARGS__)
+#define STEAL_METHOD(...) (_STEAL_METHOD, PP_EMPTY(), __VA_ARGS__)
+#define STEAL_CONST_METHOD(...) (_STEAL_METHOD, const, __VA_ARGS__)
+#define STEAL_QUALIFIED_METHOD(qualifier, ...) \
+        (_STEAL_METHOD, qualifier, __VA_ARGS__)
 
 #define STEALER(name, clz, ...) \
         _STEALER_I(name, clz, _STEALER_PREPROCESS_ARGS(clz, __VA_ARGS__))

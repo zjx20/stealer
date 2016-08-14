@@ -44,7 +44,7 @@
             if (std::string(PP_TOSTR(x)) != std::string(expected)) { \
                 throw std::runtime_error("\"" #x "\"" \
                         " is expected to be expanded as " \
-                        "\"" expected "\"" ", actual is " \
+                        "\"" expected "\"" ", actual result is " \
                         "\"" PP_TOSTR(x) "\""); \
             } else { \
                 std::cout << "Pass, " #x " = " \
@@ -52,46 +52,107 @@
             } \
         } while (0)
 
-#define PP_TEST_EX(x, ...) \
+#define PP_TEST_EX(x, expected) \
         do { \
-            const char* expects[] = {__VA_ARGS__}; \
-            bool matched = false; \
-            std::string expects_str = "["; \
-            int len = (int)(sizeof(expects) / sizeof(expects[0])); \
-            for (int i = 0; i < len; i++) { \
-                if (std::string(PP_TOSTR(x)) == std::string(expects[i])) { \
-                    std::cout << "Pass, " #x " = " \
-                              << "\"" << expects[i] << "\"" << std::endl; \
-                    matched = true; \
-                    break; \
-                } \
-                expects_str += "\"" + std::string(expects[i]) + "\""; \
-                if (i + 1 < len) { \
-                    expects_str += ", "; \
-                } \
-            } \
-            expects_str += "]"; \
-            if (!matched) { \
+            std::string result = normalize(PP_TOSTR(x)); \
+            std::string normalized = normalize(expected); \
+            if (result != normalized) { \
                 throw std::runtime_error("\"" #x "\"" \
-                        " is expected to be expanded as one of " + \
-                        expects_str + ", actual is " \
-                        "\"" PP_TOSTR(x) "\""); \
+                        " is expected to be expanded as " \
+                        "\"" + normalized + "\"" ", actual result is " \
+                        "\"" + result + "\""); \
+            } else { \
+                std::cout << "Pass, " #x " = " \
+                          << "\"" expected "\"" << std::endl; \
             } \
         } while (0)
 
-void test_basic()
+
+std::string normalize(const std::string& str)
+{
+    const std::string SEPARATORS = ",()";
+    const std::string SPACES = " ";
+    // Adds an extra separator to trim right side spaces
+    std::string original = str + ",";
+    std::string result = "";
+    bool skip_space = true;
+    for (size_t i = 0; i < original.size(); i++) {
+        std::string::value_type ch = original[i];
+        if (SPACES.find(ch) != std::string::npos) {
+            if (!skip_space) {
+                // Trims successive spaces
+                skip_space = true;
+                result += " ";
+            }
+        } else if (SEPARATORS.find(ch) != std::string::npos) {
+            // Trims spaces at both side of a separator
+            skip_space = true;
+            if (!result.empty() &&
+                    SPACES.find(*result.rbegin()) != std::string::npos) {
+                *result.rbegin() = ch;
+            } else {
+                result += ch;
+            }
+        } else {
+            // Needs a space as a separator
+            skip_space = false;
+            result += ch;
+        }
+    }
+    // Don't return the artificial character
+    return result.substr(0, result.length() - 1);
+}
+
+void test_normalize()
+{
+    const char* cases[][2] = {
+            {
+                    "    ",
+                    ""
+            },
+            {
+                    "  ,   ,   ) (  ",
+                    ",,)("
+            },
+            {
+                    " , void, foo const, int, const_foo const , float, cv_foo ",
+                    ",void,foo const,int,const_foo const,float,cv_foo"
+            }
+    };
+
+    for (size_t i = 0; i < sizeof(cases)/sizeof(char*[2]); i++) {
+        std::string result = normalize(cases[i][0]);
+        if (result != cases[i][1]) {
+            throw std::runtime_error(
+                    "normalize(\"" + std::string(cases[i][0]) + "\")" +
+                    " is expected to be equal to " +
+                    "\"" + cases[i][1] + "\"" ", actual result is " +
+                    "\"" + result + "\"");
+        }
+    }
+}
+
+void test_stealer()
 {
     PP_TEST( STEAL_FIELD(int, a), "(_STEAL_FIELD, int, a)" );
     PP_TEST( STEAL_METHOD(void, foo, int, float),
-            "(_STEAL_METHOD, void, foo, int, float)" );
+            "(_STEAL_METHOD, , void, foo, int, float)" );
+    PP_TEST( STEAL_CONST_METHOD(int, foo, int, float),
+            "(_STEAL_METHOD, const, int, foo, int, float)" );
+    PP_TEST( STEAL_QUALIFIED_METHOD(const volatile, float, foo, int, float),
+            "(_STEAL_METHOD, const volatile, float, foo, int, float)" );
 
     PP_TEST( _STEALER_PREPROCESS_ARGS(clz, 
-                                      STEAL_FIELD(int, a),
-                                      STEAL_METHOD(void, foo),
-                                      STEAL_FIELD(float, b)),
+                      STEAL_FIELD(int, a),
+                      STEAL_METHOD(void, foo),
+                      STEAL_CONST_METHOD(int, const_foo),
+                      STEAL_QUALIFIED_METHOD(const volatile, float, cv_foo),
+                      STEAL_FIELD(float, b)),
             "(_STEAL_FIELD, 1, clz, int, a) , "
-            "(_STEAL_METHOD, 2, clz, void, foo) , "
-            "(_STEAL_FIELD, 3, clz, float, b)" );
+            "(_STEAL_METHOD, 2, clz, , void, foo) , "
+            "(_STEAL_METHOD, 3, clz, const, int, const_foo) , "
+            "(_STEAL_METHOD, 4, clz, const volatile, float, cv_foo) , "
+            "(_STEAL_FIELD, 5, clz, float, b)" );
 
     PP_TEST( _STEALER_IS_FIELD_STEAL_FIELD(), "1" );
     PP_TEST( _STEALER_IS_FIELD_STEAL_METHOD(), "0" );
@@ -99,35 +160,41 @@ void test_basic()
     PP_TEST( _STEALER_IS_METHOD_STEAL_METHOD(), "1" );
 
 
-#define FILTER_TEST_DO(a, b) a, b
+#define FILTER_TEST_DO(...) __VA_ARGS__
 
     PP_TEST_EX( _STEALER_FILTER(_STEALER_IS_FIELD, FILTER_TEST_DO,
-                                STEAL_FIELD(int, a),
-                                STEAL_METHOD(void, foo),
-                                STEAL_FIELD(float, b)),
-                "int, a    float, b",
+                        STEAL_FIELD(int, a),
+                        STEAL_METHOD(void, foo),
+                        STEAL_CONST_METHOD(int, const_foo),
+                        STEAL_QUALIFIED_METHOD(const volatile, float, cv_foo),
+                        STEAL_FIELD(float, b)),
                 "int, a float, b");
 
     PP_TEST_EX( _STEALER_FILTER(_STEALER_IS_METHOD, FILTER_TEST_DO,
-                                STEAL_FIELD(int, a),
-                                STEAL_METHOD(void, foo),
-                                STEAL_FIELD(float, b)),
-                "  void, foo ",
-                "void, foo");
+                        STEAL_FIELD(int, a),
+                        STEAL_METHOD(void, foo),
+                        STEAL_CONST_METHOD(int, const_foo),
+                        STEAL_QUALIFIED_METHOD(const volatile, float, cv_foo),
+                        STEAL_FIELD(float, b)),
+                ", void, foo const, int, const_foo " \
+                "const volatile, float, cv_foo");
 
     PP_TEST_EX( _STEALER_FILTER_FIELDS(FILTER_TEST_DO,
-                                       STEAL_FIELD(int, a),
-                                       STEAL_METHOD(void, foo),
-                                       STEAL_FIELD(float, b)),
-                "int, a    float, b",
+                        STEAL_FIELD(int, a),
+                        STEAL_METHOD(void, foo),
+                        STEAL_CONST_METHOD(int, const_foo),
+                        STEAL_QUALIFIED_METHOD(const volatile, float, cv_foo),
+                        STEAL_FIELD(float, b)),
                 "int, a float, b" );
 
     PP_TEST_EX( _STEALER_FILTER_METHODS(FILTER_TEST_DO,
-                                        STEAL_FIELD(int, a),
-                                        STEAL_METHOD(void, foo),
-                                        STEAL_FIELD(float, b)),
-                "  void, foo ",
-                "void, foo");
+                        STEAL_FIELD(int, a),
+                        STEAL_METHOD(void, foo),
+                        STEAL_CONST_METHOD(int, const_foo),
+                        STEAL_QUALIFIED_METHOD(const volatile, float, cv_foo),
+                        STEAL_FIELD(float, b)),
+                ", void, foo const, int, const_foo " \
+                "const volatile, float, cv_foo");
 
 //    PP_TEST( STEALER(foo, bar, STEAL_FIELD(int, a)), "");
 }
@@ -135,7 +202,8 @@ void test_basic()
 int main()
 {
     try {
-        test_basic();
+        test_normalize();
+        test_stealer();
     } catch (std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

@@ -3,7 +3,7 @@
  * 
  * The MIT License (MIT)
  * 
- * Copyright (c) 2014 JianXiong Zhou <zhoujianxiong2@gmail.com>
+ * Copyright (c) 2014-2016 JianXiong Zhou <zhoujianxiong2@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -56,8 +56,10 @@
 #define PP_UTIL_H_ 
 #define STEALER(name,clz,...) _STEALER_I(name, clz, _STEALER_PREPROCESS_ARGS(clz, __VA_ARGS__))
 #define STEALER_H_ 
+#define STEAL_CONST_METHOD(...) (_STEAL_METHOD, const, __VA_ARGS__)
 #define STEAL_FIELD(...) (_STEAL_FIELD, __VA_ARGS__)
-#define STEAL_METHOD(...) (_STEAL_METHOD, __VA_ARGS__)
+#define STEAL_METHOD(...) (_STEAL_METHOD, PP_EMPTY(), __VA_ARGS__)
+#define STEAL_QUALIFIED_METHOD(qualifier,...) (_STEAL_METHOD, qualifier, __VA_ARGS__)
 #define _PP_FIRST_I(is_empty,...) PP_EXPAND(PP_EXPAND_CAT(_PP_FIRST_II_, is_empty)(__VA_ARGS__))
 #define _PP_FIRST_II_0(x,...) x
 #define _PP_FIRST_II_1(...) 
@@ -329,14 +331,14 @@
 #define _STEALER_IS_METHOD_STEAL_FIELD(...) 0
 #define _STEALER_IS_METHOD_STEAL_METHOD(...) 1
 #define _STEALER_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_METHOD_DO, __VA_ARGS__)
-#define _STEALER_METHOD_DO(id,clz,ret_type,name,...) stealer::_STEALER_SLOT(id)::return_type name( _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) { return (_obj->*_STEALER_REPRODUCE( (stealer::_STEALER_SLOT(id)*)NULL)) (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); }
+#define _STEALER_METHOD_DO(id,clz,qualifier,ret_type,name,...) stealer::_STEALER_SLOT(id)::return_type name( _STEALER_ARGS_WITH_NAMES(__VA_ARGS__)) qualifier { return (_obj->*_STEALER_REPRODUCE( (stealer::_STEALER_SLOT(id)*)NULL)) (_STEALER_ARGS_ONLY_NAMES(__VA_ARGS__)); }
 #define _STEALER_MOULD _STEALER_MOULD_I(__LINE__)
 #define _STEALER_MOULD_I(line) _STEALER_MOULD_II(line)
 #define _STEALER_MOULD_II(line) _mould_##line
 #define _STEALER_PREPARE_FIELDS(...) _STEALER_FILTER_FIELDS(_STEALER_PREPARE_FIELD_DO, __VA_ARGS__)
 #define _STEALER_PREPARE_FIELD_DO(id,clz,type,name) struct _STEALER_SLOT(id) { typedef type value_type; typedef value_type(clz::*shape); friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); }; template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
 #define _STEALER_PREPARE_METHODS(...) _STEALER_FILTER_METHODS(_STEALER_PREPARE_METHOD_DO, __VA_ARGS__)
-#define _STEALER_PREPARE_METHOD_DO(id,clz,ret_type,name,...) struct _STEALER_SLOT(id) { typedef ret_type return_type; typedef ret_type(clz::*shape)(__VA_ARGS__); friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); }; template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
+#define _STEALER_PREPARE_METHOD_DO(id,clz,qualifier,ret_type,name,...) struct _STEALER_SLOT(id) { typedef ret_type return_type; typedef ret_type(clz::*shape)(__VA_ARGS__) qualifier; friend shape _STEALER_REPRODUCE(_STEALER_SLOT(id)*); }; template struct stealer::_STEALER_MOULD<_STEALER_SLOT(id), &clz::name>;
 #define _STEALER_PREPROCESS_ARGS(clz,...) PP_FOR(PP_SIZE(__VA_ARGS__), _STEALER_PREPROCESS_ARGS_DO, PP_COMMA, clz, __VA_ARGS__)
 #define _STEALER_PREPROCESS_ARGS_DO(i,...) _STEALER_PREPROCESS_ARGS_DO_I( _STEALER_PREPROCESS_ARGS_DO_II(i, __VA_ARGS__))
 #define _STEALER_PREPROCESS_ARGS_DO_I(...) __VA_ARGS__

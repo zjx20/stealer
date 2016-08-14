@@ -67,6 +67,16 @@ private:
         return a;
     }
 
+    void private_const_method() const
+    {
+        std::cout << "in private_const_method()!" << std::endl;
+    }
+
+    void private_volatile_method() volatile
+    {
+        std::cout << "in private_volatile_method()!" << std::endl;
+    }
+
     template <typename T>
     void private_template()
     {
@@ -91,6 +101,8 @@ STEALER(stealer_private_t, private_t,
 
        STEAL_METHOD(void, private_method),
        STEAL_METHOD(int, private_method3, int, double, const std::string&),
+       STEAL_CONST_METHOD(void, private_const_method),
+       STEAL_QUALIFIED_METHOD(volatile, void, private_volatile_method),
 );
 
 } // namespace myspace
@@ -114,6 +126,8 @@ int main()
     // call private methods
     steal.private_method();
     steal.private_method3(100, 123.4, "foo");
+    steal.private_const_method();
+    steal.private_volatile_method();
 
     std::cout << std::endl;
 
